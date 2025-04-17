@@ -1,0 +1,24 @@
+﻿.download.icon {
+    cursor: pointer;
+    margin-left: 0.7em;
+    margin-top: 0.7em;
+    position: absolute;
+    z-index: 2;
+    font-size: 25.5px;
+    color: #999;
+}
+
+#heading {
+    margin-top: 15em;
+    font-size: 14px;
+    color: #888;
+    font-family: Arial, sans-serif;
+}
+
+.ui.selection.dropdown .text {
+    font-size: inherit !important;
+}
+
+.ui.selection.dropdown .item {
+    font-size: inherit !important;
+}

@@ -1,0 +1,549 @@
+﻿<link rel="stylesheet" type="text/css" href="~/css/Dashboard.css" />
+
+@* CARDS *@
+<div class="mt-5 header-container3">    
+    <div class="ui two column stackable grid container">
+        <div class="column">
+            <div class="ui red card" data-title="Number of timesheets awaiting your approval." data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Pending Approvals</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" id="pendingApprovals">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column" onclick="debounce(mgrDashboard.openUsersModal(), 500)">
+            <div class="ui green card" id="hoverablepointer" data-title="Users reporting to you. (Click to view the list) " data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Managed Users</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" id="usersUnderMe">
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+            </div>
+        </div>
+
+        @* <div class="column">
+            <div class="ui green card" id="hoverablepointer" data-title="User designated to approve timesheets in your absence." data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Timesheet Approval <br/> Delegated To</div>
+                    <hr />
+                    <br />
+                </div>
+                <div class="extra-content mt-5">
+                    <div class="center aligned author">
+
+                        <div class="ui statistic">
+                            <div class="ui center aligned large header" id="delegateTimeSpan">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+  *@   
+        <div class="column" onclick="debounce(mgrDashboard.openDefaultersModal(), 500)">
+            <div class="ui red card" id="hoverablepointer" data-title="List of users whose timesheet is pending to get submitted.(Click to View the List)" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Missing Timesheets</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" style="color:red;" id="managerDefaultersCount">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+</div>
+
+
+@* MODAL USERS *@
+<div id="usersModal" class="ui small centered modal" style="max-height: 70vh; overflow-y: auto;">
+    <div style="position: absolute; top: 10px; right: 10px; cursor: pointer;">
+        <i class="ui large close icon" onclick="$('#usersModal').modal('hide');"></i>
+    </div>
+    <div class="ui centered huge header">Managed Users</div>
+    <div class="centered content" >
+        <div id="usersGrid" class="ag-theme-alpine" style="height: 330px; width: 99%; margin: auto;"></div>
+    </div>
+</div>
+
+
+@* MODAL MANAGER DEFAULTERS *@
+<div id="managerdefaultermodal" class="ui centered modal" style="max-height: 70vh; overflow-y: auto;">
+    <div style="position: absolute; top: 10px; right: 10px; cursor: pointer;">
+        <i class="ui large close icon" onclick="$('#managerdefaultermodal').modal('hide');"></i>
+    </div>
+    <div class="header" style="position: top fixed;">
+        <h1 class="ui center aligned header-container3 x-large">Missing Timesheets</h1>
+    </div>
+    <div class="scrolling content" style="height: 60vh;">
+        <div class="ui fluid styled accordion" id="defaultersAccordion">
+            <div id="noDefaultersMessage" class="ui center aligned message" style="display:none;">
+                <div class="content">
+                    <p>No defaulters found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* MODAL DELEGATES *@
+<div class="ui medium modal" id="delegateModal" style="display:none; height: 70vh;">
+    <div style="position: absolute; top: 10px; right: 10px; cursor: pointer;">
+        <i class="ui large close icon" onclick="$('#delegateModal').modal('hide');"></i>
+    </div>
+    <h1 class="ui center aligned header-container3 x-large" id="modalHeader">Manage Delegate</h1>
+    <div class="content">
+        <div class="ui form">
+            <div class="ui large header field">
+                <label id="delegateLabel">Select Delegate</label>
+
+                <div class="ui input" id="userDisplay" style="display: none;">
+                    <span class="ui medium header" id="selectedUserName"></span>
+                </div>
+                <div class="ui search selection dropdown" id="ddlUser">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select User</div>
+                    <div class="menu" id="ddlUserMenu"></div>
+                </div>
+            </div>
+            <div class="ui header field">
+                <h3 id="delegateLabel">Start Date</h3>
+                <input type="date" name="start-date" id="start-date-input" />  
+            </div>
+            <div class="ui header field">
+                <h3 id="delegateLabel">End Date</h3>
+                <input type="date" name="end-date" id="end-date-input" />
+            </div>
+            <div class="basic actions">
+                <div class="ui two column container padded">
+                <div class="ui blue button column" id="saveDelegateBtn"><i class="save icon"></i>Save</div>
+                <div class="ui column right aligned" style="display:none; color: red;" id="error-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var mgrDashboard = {
+        objGrid: null
+    };
+
+    // Fetch and display pending approvals count
+    mgrDashboard.pendingApprovalsData = function () {
+        fetch('/api/Dashboard/getpendingapprovalscount')
+            .then(response => response.json())
+            .then(data => {
+                $('#pendingApprovals').text(data.pendingApprovals);
+            })
+            .catch(error => console.error("Error fetching pending approvals data:", error));
+    };
+
+    // Fetch users data and return it
+    mgrDashboard.managedUsersData = async function () {
+        var response = await fetch('/api/Dashboard/getmanagedusers');
+        var data = await response.json();
+        $('#usersUnderMe').text(data.length);
+        return data;
+    };
+
+    // Delegate Name
+    mgrDashboard.mgrDashDelegateData = function () {
+        fetch('/api/Dashboard/getdelegatetimespan')
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                var delegateTimeSpan = data.delegateTimeSpan;
+
+                var firstBracketIndex = delegateTimeSpan.indexOf('(');
+                var username = delegateTimeSpan.substring(0, firstBracketIndex).trim();
+                var dateRange = delegateTimeSpan.substring(firstBracketIndex).trim();
+
+                // Splitting the data into 2 parts
+                $('#delegateTimeSpan').html(`<div>${username}</div><div>${dateRange}</div>`);
+            });
+    };
+
+    // Fetch Delegate Information
+    mgrDashboard.getDelegateInfo = async function () {
+            var response = await fetch('/api/Dashboard/getdelegateinfo');
+            var data = await response.json();
+
+            
+                // Populate user dropdown
+                if (data.delegateId) {
+                    
+                    $('#userDisplay').show();
+                }
+
+                var delegate = data.delegateID;
+                $('#ddlUser').dropdown('set selected', delegate);
+                // Populate start date
+                if (data.startDate) {
+                    $('#start-date-input').val(data.startDate.split('T')[0]);
+                }
+
+                // Populate end date
+                if (data.endDate) {
+                    $('#end-date-input').val(data.endDate.split('T')[0]);
+                }
+
+                mgrDashboard.checkDropdowns();
+            
+    };
+
+    // Fetch all users for the dropdown
+    mgrDashboard.getAllUsers = async function () {
+        var response = await fetch('/api/Dashboard/GetAllUsers');
+        return await response.json();
+    };
+
+    // Populate Dropdown with Users
+    mgrDashboard.populateDropdown = function (dropdownId, users) {
+        var dropdownMenu = $(`#${dropdownId}`);
+        dropdownMenu.empty();
+
+        if (!users || users.length === 0) {
+            dropdownMenu.append('<div class="item disabled" data-value="">No Users Available</div>');
+        }
+        else {
+            dropdownMenu.append('<div class="item" data-value="null">None</div>');
+
+            users.forEach(user => {
+                dropdownMenu.append(`<div class="item" data-value="${user.userID}">${user.userName}</div>`);
+            });
+        }
+        $(`#${dropdownId}`).dropdown();
+    };
+
+    // Initialize Dropdowns
+    mgrDashboard.initializeDropdowns = function () {
+        $('#ddlUser').dropdown({
+            onChange: mgrDashboard.checkDropdowns
+        });
+
+        mgrDashboard.checkDropdowns();
+    };
+
+    // Dropdown value check
+    mgrDashboard.checkDropdowns = function () {
+        var userSelected = $('#ddlUser').dropdown('get value');
+
+        var startDate = $('#start-datsavee-input').val();
+        var endDate = $('#end-date-input').val();
+        var isValid = userSelected && userSelected !== 'null' && startDate && endDate;
+
+        $('#saveDelegateBtn').prop('disabled', !isValid);
+
+        return isValid;
+    };
+
+    // Debounce function to prevent multiple rapid clicks
+    function debounce(func, delay) {
+        let timeout;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    // Save Delegate
+    mgrDashboard.saveDelegate = function () {
+        var selectedUserId = $('#ddlUser').dropdown('get value');
+        var startDate = $('#start-date-input').val();
+        var endDate = $('#end-date-input').val();
+
+        // Validate inputs
+        const validateForm = (selectedUserId, startDate, endDate) => {
+            const $errorMessage = $('#error-message');
+
+            // Helper function to display error
+            const showError = (message) => {
+                $errorMessage.css('display', 'inline').html(message);
+            };
+
+            // Clear previous error message
+            $errorMessage.css('display', 'none').html('');
+
+            // Validate delegate name
+            if (!selectedUserId || selectedUserId === 'null') {
+                showError('Please add a delegate name');
+                return false;
+            }
+
+            // Validate start date
+            if (!startDate) {
+                showError('Please fill start date field');
+                return false;
+            }
+
+            // Validate end date
+            if (!endDate) {
+                showError('Please fill end date field');
+                return false;
+            }
+
+            // Validate date range
+            if (new Date(startDate) > new Date(endDate)) {
+                showError('Start date must be before or equal to end date');
+                return false;
+            }
+
+            // All validations passed
+            return true;
+        }
+
+        if (!validateForm(selectedUserId, startDate, endDate)) {
+            return; 
+        }
+
+        var payload = {
+            ManagerID: null,
+            DelegateID: parseInt(selectedUserId),
+            StartDate: startDate,
+            EndDate: endDate,
+            ModUser: null
+        };
+
+        $.ajax({
+            url: 'api/Dashboard/save',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                $('#delegateModal').modal('hide');
+
+                mgrDashboard.mgrDashDelegateData();
+            }
+        });
+    };
+
+    function debounce(func, delay) {
+
+        let timeout;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    mgrDashboard.fetchDefaultersData = async function () {
+            var response = await fetch('/api/Dashboard/getmanagerdefaulters');
+            var defaultersData = await response.json();
+
+            var groupedDefaulters = defaultersData.reduce((acc, item) => {
+                var existingUser = acc.find(user => user.userId === item.userId);
+
+                if (existingUser) {
+                    existingUser.defaultDurations.push(item.duration);
+                } else {
+                    acc.push({
+                        userId: item.userId,
+                        userName: item.user,
+                    defaultDurations: [item.duration],
+                        defaultCount: 1
+                    });
+                }
+
+                return acc;
+            }, []);
+
+            // Populate the modal
+            mgrDashboard.populateDefaultersModal(groupedDefaulters);
+    };
+
+    mgrDashboard.populateDefaultersModal = function (defaultersData) {
+        var $accordion = $('.ui.fluid.styled.accordion');
+        $accordion.empty(); 
+
+        // Update the defaulters count in the header
+        var totalDefaulters = defaultersData.reduce((sum, user) => sum + user.defaultDurations.length, 0);
+
+        // Create accordion items for each defaulter
+        defaultersData.forEach(user => {
+            var $title = $('<div>')
+                .addClass('title')
+                .html(`
+                    <i class="dropdown icon"></i>
+                            ${user.userName} <div class="ui small red circular labels" style="display: inline;"><a class="ui small label">${user.defaultDurations.length}</a></div>
+                `);
+
+            // Create accordion content
+            var $content = $('<div>')
+                .addClass('content')
+                .append(
+                    $('<div>')
+                        .addClass('ui ordered list')
+                        .append(
+                            user.defaultDurations.map(duration =>
+                                $('<span>')
+                                    .addClass('ui grey medium text item')
+                                    .html(`<b>${duration}</b>`)
+                            )
+                        )
+                );
+
+            $accordion.append($title).append($content);
+        });
+
+        $('.ui.accordion').accordion('refresh');
+    };
+
+    // Open the Users modal with the grid
+    mgrDashboard.openUsersModal = async function () {
+        if (mgrDashboard.objGrid) {
+            mgrDashboard.objGrid.destroy();
+            mgrDashboard.objGrid = null;
+        }
+
+        var data = await mgrDashboard.managedUsersData();
+
+        // Initialize AG Grid columns
+        var columnDefs = [
+            {
+                headerName: '#',
+                valueGetter: params => params.node.rowIndex + 1,
+                maxWidth: 120,
+                cellStyle: { textAlign: 'center', fontSize: '20px', borderRight: '1px solid #ccc' }
+            },
+            {
+                headerName: 'User Name',
+                field: 'username',
+                minWidth: 100,
+                flex: 1,
+                cellStyle: { fontSize: '20px', borderRight: '1px solid #ccc' }
+            },
+            {
+                headerName: 'Type',
+                valueGetter: params => params.data.isPrimary ? 'Primary' : 'Secondary',
+                minWidth: 100,
+                maxWidth: 150,
+                cellStyle: { textAlign: 'center', fontSize: '20px', borderRight: '1px solid #ccc' }
+            }
+        ];
+
+        var gridOptions = {
+            columnDefs: columnDefs,
+            rowData: data,
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+            },
+            defaultColDef: {
+                resizable: false
+            },
+            getRowStyle: params => {
+                if (params.node.rowIndex % 2 === 0) {
+                    return { background: '#ffffff' };
+                }
+                return { background: '#e6f7ff' };
+            },
+        };
+
+        // Create the AG Grid instance
+        var eGridDiv = $('#usersGrid')[0];
+        mgrDashboard.objGrid = new agGrid.Grid(eGridDiv, gridOptions);
+
+        // Show the modal
+        $('#usersModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true
+        }).modal('show');
+    };
+
+    // Open Assign Delegation Modal
+    mgrDashboard.openDelegateModal = async function () {
+        // Reset previous state
+        $('#userDisplay').hide();
+        $('#selectedUserName').text('');
+        $('#ddlUser').dropdown('clear');
+        $('#start-date-input, #end-date-input').val('');
+
+        // Fetch all users
+        var allUserData = await mgrDashboard.getAllUsers();
+
+        mgrDashboard.populateDropdown('ddlUserMenu', allUserData);
+        mgrDashboard.initializeDropdowns();
+
+        await mgrDashboard.getDelegateInfo();
+
+        $('#delegateModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true,
+            onHidden: function () {
+                $('#ddlUser').dropdown('clear');
+                $('#start-date-input, #end-date-input').val('');
+                $('#userDisplay').hide();
+                $('#error-message').css('display', 'none').html('');
+                mgrDashboard.checkDropdowns();
+            }
+        }).modal('show');
+    };
+
+    $('#assignBtn').on('click', function () {
+        mgrDashboard.openDelegateModal();
+    });
+
+    $('#start-date-input, #end-date-input').on('change', mgrDashboard.checkDropdowns);
+
+    $('#saveDelegateBtn').on('click', debounce(mgrDashboard.saveDelegate, 500));
+
+    mgrDashboard.openDefaultersModal = async function () {
+        mgrDashboard.fetchDefaultersData();
+        $('#managerdefaultermodal').modal({
+            centered: true,
+            detachable: false,
+            closable: true
+        }).modal('show');
+        $('.ui.accordion')
+            .accordion()
+            ;
+    };
+
+    mgrDashboard.updateDefaultersCount = async function () {
+            const response = await fetch('/api/Dashboard/getmanagerdefaulters');
+            const defaultersData = await response.json();
+            const totalDefaulters = defaultersData.length;
+
+            $('#managerDefaultersCount').text(totalDefaulters);
+
+            return defaultersData;
+    };
+
+    $(document).ready(function () {
+        $('.ui.card').popup();
+        mgrDashboard.pendingApprovalsData();
+        mgrDashboard.managedUsersData();
+        mgrDashboard.mgrDashDelegateData();
+        mgrDashboard.updateDefaultersCount();
+    });
+</script>

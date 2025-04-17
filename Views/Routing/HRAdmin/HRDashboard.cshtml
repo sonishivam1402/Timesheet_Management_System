@@ -1,0 +1,84 @@
+﻿<link rel="stylesheet" type="text/css" href="~/css/Dashboard.css" />
+
+@* CARDS *@
+<div class="mt-5 header-container3">
+    <div class="ui two column stackable grid container">
+        <div class="column">
+            <div class="ui red card" data-title="Number of users who do not have an approver assigned to them" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Missing Approver</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" id="usersWithoutApprovers">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="ui red card" data-title="Number of Users without Secondary Approver assigned to them" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Missing Secondary</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" id="usersWithoutSecondaryApprovers">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="ui red card" data-title="Number of Users Who have not submitted Timesheet since 2 or more weeks" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Defaulters</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui statistic">
+                            <div class="value" id="defaulters" style="color:red;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var dashboardData = {};
+
+    dashboardData.noApproverCnt = function () {
+        fetch('/api/Dashboard/getmissingapprovercount')
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                $('#usersWithoutApprovers').text(data.noApproverCount);
+                $('#usersWithoutSecondaryApprovers').text(data.noSecApproverCount);
+            })
+    };
+
+    dashboardData.defaulterCount = function() {
+        fetch('/api/Dashboard/getdefaulterscount')
+            .then(response => response.json())
+            .then(data => {
+                    $('#defaulters').text(data.defaultersCount);
+            })
+    };
+
+    $(document).ready(function () {
+        $('.ui.card').popup();
+        dashboardData.noApproverCnt();
+        dashboardData.defaulterCount();
+    });
+</script>

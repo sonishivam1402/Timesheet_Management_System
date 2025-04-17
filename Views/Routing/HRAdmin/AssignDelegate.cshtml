@@ -1,0 +1,405 @@
+﻿<div class="main-component">
+    <!--HEADING-->
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">Assign Delegate</h1>
+        </div>
+        <div class="eight wide column right aligned">
+            <button class="ui green button large" id="assignBtn"><i class="ui plus icon"></i>Assign Delegate</button>
+        </div>
+    </div>
+    <!--GRID-->
+    <div id="delegateGrid" class="ag-theme-alpine main-component_body" style="height: 80vh; width: 98.5%;">
+    </div>
+</div>
+
+<!--MODAL-->
+<div class="ui medium modal" id="delegateModal" style="height: auto;">
+    <h1 class="ui center aligned header x-large" id="delegateModalHeader">Assign Delegate</h1>
+    <div class="content" style="overflow-y: auto;">
+        <div class="ui form">
+            <div class="ui large header field">
+                <label>Manager</label>
+                <div class="ui search selection dropdown" id="ddlManager">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Manager</div>
+                    <div class="menu" id="ddlManagerMenu"></div>
+                </div>
+            </div>
+            <div class="ui large header field">
+                <label>Delegate</label>
+                <div class="ui search selection dropdown" id="ddlDelegate">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Delegate</div>
+                    <div class="menu" id="ddlDelegateMenu"></div>
+                </div>
+            </div>
+            <div class="two fields">
+                <div class="ui medium header field">
+                    <label>Start Date</label>
+                    <div class="ui calendar" id="dpStartDate">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Start Date">
+                        </div>
+                    </div>
+                </div>
+                <div class="ui medium header field">
+                    <label>End Date</label>
+                    <div class="ui calendar" id="dpEndDate">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="End Date">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions ui m-3">
+            <button class="ui large blue right floated button" id="saveBtn">
+                <i class="ui save icon"></i> Save
+            </button>
+            <button class="ui large red right floated button" id="closeDelegateModal">
+                <i class="ui cancel icon"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!--JAVASCRIPT-->
+<script>
+
+    var managerDelegateInfo = {};
+
+    managerDelegateInfo.currentAction = "";
+
+    // Store values for POST
+    managerDelegateInfo.objPost = {
+        "managerId": null,
+        "delegateId": null,
+        "startDate": null,
+        "endDate": null,
+        "modeUser": null
+    }
+
+    // Fetch grid data
+    managerDelegateInfo.getGridData = async function () {
+        var response = await fetch('/api/Delegate');
+        return await response.json();
+    }
+
+    // Load dropdowns
+    managerDelegateInfo.loadDropdowns = function () {
+        $.ajax({
+            url: '/api/Delegate',
+            method: 'GET',
+            dataType: 'json',
+            success: (assignedData) => {
+                var assignedManagerIds = assignedData.map(item => item.managerID);
+
+                $.ajax({
+                    url: '/api/Delegate/getallmanagers',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: (managers) => {
+                        var availableManagers = managers.filter(
+                            manager => !assignedManagerIds.includes(manager.managerID)
+                        );
+
+                        managerDelegateInfo.populateDropdown('#ddlManager', availableManagers, 'managerName', 'managerID');
+                    }
+                });
+            }
+        });
+
+        $.ajax({
+            url: '/api/HRAdmin/GetAllUsers',
+            method: 'GET',
+            dataType: 'json',
+            success: (delegates) => {
+                managerDelegateInfo.populateDropdown('#ddlDelegate', delegates, 'userName', 'userID');
+            }
+        });
+    }
+
+    // Initialize grid
+    managerDelegateInfo.initializeGrid = async function () {
+        if (!_.isEmpty(managerDelegateInfo.objGrid)) managerDelegateInfo.objGrid.destroy();
+        var delegateData = await managerDelegateInfo.getGridData();
+        var columnDefs = [
+            {
+                headerName: 'Manager',
+                field: 'managerName',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                cellRenderer: (params) => {
+                    return params.value
+                        ? `<span class="user-name centered">${params.value}</span>`
+                        : '-';
+                }
+            },
+            {
+                headerName: 'Delegate',
+                field: 'delegateName',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                cellRenderer: (params) => {
+                    return params.value
+                        ? `<span class="user-name centered">${params.value}</span>`
+                        : `-`;
+                }
+            },
+            {
+                headerName: 'Start Date',
+                field: 'startDate',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                valueFormatter: params => {
+                    return params.value
+                        ? helper.DateForamt1(params.value)
+                        : '-';
+                }
+            },
+            {
+                headerName: 'End Date',
+                field: 'endDate',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                valueFormatter: params => {
+                    return params.value
+                        ? helper.DateForamt1(params.value)
+                        : '-';
+                }
+            },
+            {
+                headerName: 'Modified By',
+                field: 'modifiedByName',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                cellRenderer: (params) => {
+                    return params.value
+                        ? `<span class="user-name centered">${params.value}</span>`
+                        : '-';
+                }
+            },
+            {
+                headerName: 'Modified On',
+                field: 'modifiedOn',
+                flex: 1,
+                filter: true,
+                cellStyle: { fontSize: '16px' },
+                valueFormatter: params => {
+                    return helper.ToLocalDate2(params.value);
+                }
+            },
+            {
+                headerName: 'Action',
+                // field: 'managerID',
+                cellRenderer: managerDelegateInfo.renderEditButton,
+                pinned: 'right',
+                width: 140,
+                cellStyle: { minWidth: '60px' },
+                filter: false,
+                sortable: false,
+                resizable: true
+            }
+        ];
+
+        var gridOptions = {
+            columnDefs: columnDefs,
+            rowData: delegateData,
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+            }
+        };
+
+        var eGridDiv = $('#delegateGrid')[0];
+        managerDelegateInfo.objGrid = new agGrid.Grid(eGridDiv, gridOptions);
+    }
+
+    // Render edit button
+    managerDelegateInfo.renderEditButton = function (params) {
+        var button = document.createElement('button');
+        button.className = 'ui primary button small';
+        button.innerHTML = '<i class="ui edit icon"></i> Edit';
+
+        button.addEventListener('click', () => {
+            managerDelegateInfo.editDelegate(params.data);
+        });
+
+        return button;
+    }
+
+    // Populate dropdowns
+    managerDelegateInfo.populateDropdown = function (selector, data, textField, valueField) {
+        var $menu = $(selector + 'Menu');
+        $menu.empty();
+
+        $menu.append(
+            $('<div>')
+                .addClass('item')
+                .attr('data-value', 'null')
+                .text('None')
+        );
+
+        $.each(data, function (index, item) {
+            $menu.append(
+                $('<div>')
+                    .addClass('item')
+                    .attr('data-value', item[valueField])
+                    .attr('data-full-name', item[textField])
+                    .text(item[textField])
+            );
+        });
+
+        $(selector).dropdown();
+    }
+
+    // Show modal
+    managerDelegateInfo.showModal = function () {
+        managerDelegateInfo.currentAction = 'add';
+        managerDelegateInfo.clearFields();
+
+        $('#ddlManager').removeClass('set disabled', false);
+
+        $('#delegateModal').modal('show');
+        $('#delegateModalHeader').text('Assign Delegate');
+    }
+
+    // Close modal
+    managerDelegateInfo.closeModal = function () {
+        $('#delegateModal').modal('hide');
+        managerDelegateInfo.clearFields();
+    }
+
+    // Clear fields
+    managerDelegateInfo.clearFields = function () {
+        $('#ddlManager, #ddlDelegate').dropdown('clear');
+        $('#dpStartDate').calendar('clear');
+        $('#dpEndDate').calendar('clear');
+    }
+
+    // Bind events
+    managerDelegateInfo.bindEvents = function () {
+        $('#assignBtn').on('click', () => managerDelegateInfo.showModal());
+        $('#closeDelegateModal').on('click', () => managerDelegateInfo.closeModal());
+        $('#saveBtn').on('click', () => managerDelegateInfo.save());
+        $('#dpStartDate').calendar({
+            type: 'date',
+            endCalendar: $('#dpEndDate')
+        });
+        $('#dpEndDate').calendar({
+            type: 'date',
+            startCalendar: $('#dpStartDate')
+        });
+    }
+
+    // Bind form
+    managerDelegateInfo.bindForm = function () {
+        managerDelegateInfo.objPost.managerId = $('#ddlManager').dropdown('get value');
+        managerDelegateInfo.objPost.delegateId = $('#ddlDelegate').dropdown('get value');
+        managerDelegateInfo.objPost.startDate = $('#dpStartDate').calendar('get date');
+        managerDelegateInfo.objPost.endDate = $('#dpEndDate').calendar('get date');
+    }
+
+    // Save
+    managerDelegateInfo.save = function () {
+        managerDelegateInfo.bindForm();
+
+        if (!managerDelegateInfo.objPost.managerId || !managerDelegateInfo.objPost.delegateId || !managerDelegateInfo.objPost.startDate || !managerDelegateInfo.objPost.endDate) {
+            helper.ErrorToast('Please fill all required fields.');
+            return;
+        }
+
+        if (managerDelegateInfo.objPost.startDate >= managerDelegateInfo.objPost.endDate) {
+            helper.ErrorToast('End date must be after start date.');
+            return;
+        }
+
+        var postData = {
+            id: managerDelegateInfo.editingRecordId, // ID for edit
+            managerId: managerDelegateInfo.objPost.managerId,
+            delegateId: managerDelegateInfo.objPost.delegateId,
+            startDate: managerDelegateInfo.objPost.startDate,
+            endDate: managerDelegateInfo.objPost.endDate
+        };
+
+        $.ajax({
+            url: '/api/Delegate/save',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            success: (response) => {
+                helper.SuccessToast('Delegate Saved/Updated Successfully');
+
+                managerDelegateInfo.closeModal();
+                managerDelegateInfo.initializeGrid();
+
+                managerDelegateInfo.loadDropdowns();
+
+                managerDelegateInfo.currentAction = '';
+                managerDelegateInfo.editingRecordId = null;
+            },
+            error: (xhr, status, error) => {
+                helper.ErrorToast('Failed to Save/Update Delegate');
+            }
+        });
+    }
+
+    // Edit
+    managerDelegateInfo.editDelegate = function (data) {
+        managerDelegateInfo.currentAction = 'edit';
+        managerDelegateInfo.editingRecordId = data.managerID;
+
+        $('#delegateModalHeader').text('Edit Delegate');
+
+        $('#ddlManager')
+            .dropdown('set value', data.managerID.toString())
+            .dropdown('set text', data.managerName)
+            .addClass('disabled');
+
+        $('#ddlDelegate')
+            .dropdown('set value', data.delegateID.toString())
+            .dropdown('set text', data.delegateName);
+
+        // Parse and set dates
+        var startDate = data.startDate ? new Date(data.startDate) : null;
+        var endDate = data.endDate ? new Date(data.endDate) : null;
+
+        if (startDate) {
+            $('#dpStartDate').calendar('set date', startDate);
+        }
+        if (endDate) {
+            $('#dpEndDate').calendar('set date', endDate);
+        }
+
+        $('#delegateModal').modal('show');
+    }
+
+    // Init function
+    managerDelegateInfo.init = function () {
+        managerDelegateInfo.currentAction = "";
+        managerDelegateInfo.editingRecordId = null;
+        managerDelegateInfo.initializeGrid();
+        managerDelegateInfo.bindEvents();
+        managerDelegateInfo.loadDropdowns();
+        $('.ui.modal')
+            .modal({
+                centered: true,
+                detachable: false,
+                closable: true
+            });
+    }
+
+    $('document').ready(async function () {
+        await managerDelegateInfo.init();
+    });
+</script>          

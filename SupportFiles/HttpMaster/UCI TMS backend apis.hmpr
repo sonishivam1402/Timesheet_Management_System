@@ -1,0 +1,1500 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Id>0ecdd0a8-f260-4043-abaf-1aa2f906df29</Id>
+  <Name>UCI TMS backend apis</Name>
+  <Url>https://localhost:7080/</Url>
+  <QueryString />
+  <HttpProtocol>1.1</HttpProtocol>
+  <Timeout>30</Timeout>
+  <ProjectFileEncoding>utf-8</ProjectFileEncoding>
+  <RequestEncoding>utf-8</RequestEncoding>
+  <AutomaticDecompression>true</AutomaticDecompression>
+  <DynamicParameters />
+  <Headers />
+  <UseAuthentication>false</UseAuthentication>
+  <AuthenticationData>
+    <AuthenticationCredentials />
+    <SpecifiedCredentials />
+  </AuthenticationData>
+  <AllowRedirect>true</AllowRedirect>
+  <KeepAlive>true</KeepAlive>
+  <EncodeUrl>true</EncodeUrl>
+  <EncodeForm>true</EncodeForm>
+  <ProjectItems>
+    <ProjectItem>
+      <Id>0bdb1417-2011-485e-a0f6-ab39955e8e9c</Id>
+      <Name>add or update timesheet line</Name>
+      <Url>/api/TimesheetLine</Url>
+      <RequestBody>{
+  "lineID": 0,
+  "timesheetID": 0,
+  "engagementID": 0,
+  "taskID": 0,
+  "hours": 0,
+  "minutes": 0,
+  "date": "",
+  "comment": "",
+  "createdBy": 0,
+  "modifiedBy": 0
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652876281780927</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders />
+      <ExecutionOrder>32</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>e9505e9a-6994-44be-8c69-bd0ed0eff3a7</Id>
+      <Name>DELETE a Timesheet Row</Name>
+      <Url>/api/TimesheetLine/{lineID}</Url>
+      <RequestBody />
+      <Method>DELETE</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652722324286113</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>34</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>f062ce11-dbc4-4be6-80f8-9021bad3a0cf</Id>
+      <Name>GET Data of All Users</Name>
+      <Url>/api/User/GetAllUsers</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652722692572667</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>36</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>4ddeb0a4-e01f-43c6-979a-54ca4be3a8b2</Id>
+      <Name>GET Engagaments specific to User and filter by Date</Name>
+      <Url>/api/ManageEngagement/GetEngagementsByUserAndDate/{userId}/{date}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652722796541979</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>12</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>a67607a4-82d7-4fab-965b-d6fc1ff952dc</Id>
+      <Name>GET Engagements of Manager</Name>
+      <Url>/api/ManageEngagement/user/{userId}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652722877761032</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>10</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>a1975b71-dc07-453d-86dc-3bc0ed5eb97d</Id>
+      <Name>GET Owners of Engagaments</Name>
+      <Url>/api/ManageEngagement/owners</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652722997925918</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>11</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>71c4fbb1-edd6-4e65-93d8-3836d629bf7e</Id>
+      <Name>GET Tasks by TaskID</Name>
+      <Url>/api/ManageEngagement/tasks/{id}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652723761259194</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>8</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>cbd9dbff-61dd-4272-bcd7-4f59ed2d16a0</Id>
+      <Name>ADD Engagement</Name>
+      <Url>/api/ManageEngagement/Add</Url>
+      <RequestBody>{
+  "engagementID": 0,
+  "title": "",
+  "startDate": "",
+  "endDate": "",
+  "description": "",
+  "createdBy": 0,
+  "modifiedBy": 0,
+  "createdOn": "",
+  "modifiedOn": "",
+  "isActive": false,
+  "engagementCategoryID": 0,
+  "teamMembers": [
+    {
+      "mappingID": 0,
+      "userID": 0,
+      "teamMemberName": "",
+      "startDate": "",
+      "endDate": "",
+      "maxWeeklyHours": 0,
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "modifiedOn": "",
+      "createdOn": "",
+      "engagementID": 0
+    }
+  ],
+  "tasks": [
+    {
+      "engagementTaskID": 0,
+      "engagementID": 0,
+      "taskID": 0,
+      "taskName": "",
+      "taskDescription": "",
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "modifiedOn": "",
+      "createdOn": ""
+    }
+  ],
+  "owners": [
+    {
+      "mappingID": 0,
+      "engagementID": 0,
+      "userID": 0,
+      "ownerName": "",
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "createdOn": "",
+      "modifiedOn": ""
+    }
+  ]
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652723969409068</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders />
+      <ExecutionOrder>3</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>dbff7f32-44d9-4234-9494-f610472c6d12</Id>
+      <Name>ADD New Timesheet</Name>
+      <Url>/api/timesheet/add</Url>
+      <RequestBody>{
+  "timesheetID": 0,
+  "userID": 0,
+  "startDate": "",
+  "endDate": "",
+  "status": 0,
+  "daysCount": 0,
+  "hoursTotal": 0,
+  "minutesTotal": 0,
+  "createdBy": 0,
+  "modifiedBy": 0,
+  "modifiedOn": "",
+  "createdOn": ""
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652724040751021</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders />
+      <ExecutionOrder>26</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>f433805e-53dd-4324-8bb6-bdba154a5083</Id>
+      <Name>ADD custom Tasks while Creating Engagement</Name>
+      <Url>/api/ManageEngagement/tasks/add</Url>
+      <RequestBody>{
+  "taskID": 0,
+  "taskName": "",
+  "taskDescription": "",
+  "isDeleted": false,
+  "isGeneric": false,
+  "createdBy": 0,
+  "modifiedBy": 0,
+  "createdOn": "",
+  "modifiedOn": ""
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652724121031348</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders />
+      <ExecutionOrder>9</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>d24767ea-9cc7-4436-8c30-0e0975622d5e</Id>
+      <Name>UPDATE Engagement Details</Name>
+      <Url>/api/ManageEngagement/Update/{id}</Url>
+      <RequestBody>{
+  "engagementID": 0,
+  "title": "",
+  "startDate": "",
+  "endDate": "",
+  "description": "",
+  "createdBy": 0,
+  "modifiedBy": 0,
+  "createdOn": "",
+  "modifiedOn": "",
+  "isActive": false,
+  "engagementCategoryID": 0,
+  "teamMembers": [
+    {
+      "mappingID": 0,
+      "userID": 0,
+      "teamMemberName": "",
+      "startDate": "",
+      "endDate": "",
+      "maxWeeklyHours": 0,
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "modifiedOn": "",
+      "createdOn": "",
+      "engagementID": 0
+    }
+  ],
+  "tasks": [
+    {
+      "engagementTaskID": 0,
+      "engagementID": 0,
+      "taskID": 0,
+      "taskName": "",
+      "taskDescription": "",
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "modifiedOn": "",
+      "createdOn": ""
+    }
+  ],
+  "owners": [
+    {
+      "mappingID": 0,
+      "engagementID": 0,
+      "userID": 0,
+      "ownerName": "",
+      "createdBy": 0,
+      "modifiedBy": 0,
+      "createdOn": "",
+      "modifiedOn": ""
+    }
+  ]
+}</RequestBody>
+      <Method>PUT</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652724469712112</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders />
+      <ExecutionOrder>4</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>539af7c5-8f29-440e-999a-5d085f452b62</Id>
+      <Name>VIEW Data for Employee-Approver Table</Name>
+      <Url>/api/HRAdmin/usermanagerinfo</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652724724928638</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>2</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>30068b61-99f5-4b67-81fa-7b8b565bbc99</Id>
+      <Name>VIEW Engagements of Employee</Name>
+      <Url>/api/Employee/engagements/EngagementsbyID/{id}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652724830035700</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>1</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>ea946ad3-987d-4c60-9424-36430cc9d217</Id>
+      <Name>VIEW Team Members</Name>
+      <Url>/api/User/GetUsersUnderManager/{managerId}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652725068160885</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>37</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>parit</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>DESKTOP-F5TNE5E</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>414fa2b9-1531-4e85-aab7-27615946c69c</Id>
+      <Name>Getting all engagement details</Name>
+      <Url>/api/ManageEngagement</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652861037560805</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>5</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>de7ad192-52a6-4777-948c-e53574295de8</Id>
+      <Name>Getting engagement by engagement id</Name>
+      <Url>/api/ManageEngagement/{id}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652861271354560</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>6</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>8a1beb95-6c37-4bf3-9979-360200d5dddb</Id>
+      <Name>Get Task dropdown menu based on engagement</Name>
+      <Url>/api/ManageEngagement/tasks</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652862546133185</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>7</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>221bc79b-a085-41c6-855b-98e0cb4ccb9a</Id>
+      <Name>Get all timesheet</Name>
+      <Url>/api/timesheet</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652871316436518</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>28</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>d5b17ad3-9c1f-4cda-b5f3-8895eed00871</Id>
+      <Name>Get Timesheet by timesheet id</Name>
+      <Url>/api/timesheet/{id}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652875360153877</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>29</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>04ecd91d-2fad-4e64-965b-8084d145f57d</Id>
+      <Name>Getting timesheet entries based on timesheetID</Name>
+      <Url>/api/TimesheetLine/{timesheetID}</Url>
+      <RequestBody />
+      <Method>GET</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>relative</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638652690480306154</CreateDate>
+      <ChangeDate>638652876628327803</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>33</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>kruna</CreateUser>
+      <ChangeUser>kruna</ChangeUser>
+      <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+      <ChangeMachine>LAPTOP-R4CBOANL</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>d09de105-063e-418a-b22f-a2146fd19a32</Id>
+      <Name>ADD Post Hook in Integration</Name>
+      <Url>https://api.posthook.io/v1/hooks</Url>
+      <RequestBody>{
+  "path": "/api/timesheet/sendemail",
+  "postAt": "2024-11-13T11:16:00.000Z",
+  "data": {}
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638666495131630172</CreateDate>
+      <ChangeDate>638670933407044216</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders>X-API-Key: 813da890bf7d45e5a2df495647216ee7</AdditionalHeaders>
+      <ExecutionOrder>38</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>1237eb5e-3ff9-4c84-af4d-c70e8584e5cf</Id>
+      <Name>Run Send Email Service Integration</Name>
+      <Url>https://ucitmsintegration-abhjbmgjhygzgrgn.centralindia-01.azurewebsites.net/api/timesheet/sendemail</Url>
+      <RequestBody />
+      <Method>POST</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638666501645966938</CreateDate>
+      <ChangeDate>638672747244786870</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>39</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>7bca96f6-6226-4c9b-9d43-dc9bceb19b2d</Id>
+      <Name>Run Send Email Service QA</Name>
+      <Url>https://ucitmsqaapp-ghecfscmhxfdf2gd.centralindia-01.azurewebsites.net/api/timesheet/sendemail</Url>
+      <RequestBody />
+      <Method>POST</Method>
+      <ContentType />
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638672743676653244</CreateDate>
+      <ChangeDate>638672747748156886</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <AdditionalHeaders />
+      <ExecutionOrder>41</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>0</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>7737ae49-b149-4e5b-9bf1-97d2085377ab</Id>
+      <Name>Delete Post Hook in Integration</Name>
+      <Url>https://api.posthook.io/v1/hooks/acee432b-86a8-4511-ba64-a9b6969dd12a</Url>
+      <RequestBody />
+      <Method>DELETE</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638672751278742450</CreateDate>
+      <ChangeDate>638672751498634430</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders>X-API-Key: 813da890bf7d45e5a2df495647216ee7</AdditionalHeaders>
+      <ExecutionOrder>42</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>981c127c-ada4-42ae-88ec-6d653de7361e</Id>
+      <Name>Delete Post Hook in QA</Name>
+      <Url>https://api.posthook.io/v1/hooks/f8935c8a-5c0d-4728-b443-d5d1104d5aa3</Url>
+      <RequestBody />
+      <Method>DELETE</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638672751635533388</CreateDate>
+      <ChangeDate>638672752576969945</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders>X-API-Key: 16411554bfba40a7b4b8e364dc0574c5</AdditionalHeaders>
+      <ExecutionOrder>43</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+    <ProjectItem>
+      <Id>c006c7f6-53b9-49db-b7e2-a02abbcc4473</Id>
+      <Name>ADD Post Hook in QA</Name>
+      <Url>https://api.posthook.io/v1/hooks</Url>
+      <RequestBody>{
+  "path": "/api/timesheet/sendemail",
+  "postAt": "2024-11-15T17:00:00.000Z",
+  "data": {}
+}</RequestBody>
+      <Method>POST</Method>
+      <ContentType>application/json</ContentType>
+      <ExecutionCount>1</ExecutionCount>
+      <UrlOption>absolute</UrlOption>
+      <AppendGlobalQueryString>false</AppendGlobalQueryString>
+      <CreateDate>638670936965241180</CreateDate>
+      <ChangeDate>638672763114286009</ChangeDate>
+      <ValidationRule />
+      <IncludeProjectAuthentication>true</IncludeProjectAuthentication>
+      <PercentEncodeParameters d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <IncludeReceivedCookies>false</IncludeReceivedCookies>
+      <IncludeProjectHeaders>true</IncludeProjectHeaders>
+      <ItemHeaders />
+      <BodySource>0</BodySource>
+      <AdditionalHeaders>X-API-Key: 16411554bfba40a7b4b8e364dc0574c5</AdditionalHeaders>
+      <ExecutionOrder>40</ExecutionOrder>
+      <IncludeWithCommandLine>true</IncludeWithCommandLine>
+      <IgnoreExecution>false</IgnoreExecution>
+      <IncludedCookies />
+      <UploadAsBase64>false</UploadAsBase64>
+      <Description />
+      <ValidationExecutionBehavior>0</ValidationExecutionBehavior>
+      <RewriteCookieDomain>false</RewriteCookieDomain>
+      <BodyViewer>2</BodyViewer>
+      <ValidationType>0</ValidationType>
+      <PreActionPath />
+      <PreActionArguments />
+      <PreActionWorkingDirectory />
+      <PreActionCondition>0</PreActionCondition>
+      <PostActionPath />
+      <PostActionArguments />
+      <PostActionWorkingDirectory />
+      <PostActionCondition>0</PostActionCondition>
+      <ParameterOrder>0</ParameterOrder>
+      <ManualExecutionCount>false</ManualExecutionCount>
+      <AddedCookies />
+      <PreActionSupport>0</PreActionSupport>
+      <PostActionSupport>0</PostActionSupport>
+      <IncludeProjectCertificates d4p1:nil="true" xmlns:d4p1="http://www.w3.org/2001/XMLSchema-instance" />
+      <ItemCertificates />
+      <CreateUser>Ritesh</CreateUser>
+      <ChangeUser>Ritesh</ChangeUser>
+      <CreateMachine>UNITE-98MD8S3</CreateMachine>
+      <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+    </ProjectItem>
+  </ProjectItems>
+  <CreateDate>638652690200195714</CreateDate>
+  <ChangeDate>638672763114286009</ChangeDate>
+  <Version>59</Version>
+  <MonitorData>true</MonitorData>
+  <Validations />
+  <ExecutionDelay>0</ExecutionDelay>
+  <FirstExecutionDelay>0</FirstExecutionDelay>
+  <Chainings />
+  <ExecutionGroups />
+  <GlobalUrlList>
+    <string>https://localhost:7080/</string>
+  </GlobalUrlList>
+  <GlobalQueryStringList />
+  <AuthorizationDataEnabled>false</AuthorizationDataEnabled>
+  <AuthorizationUrl />
+  <AuthorizationRedirectUrl />
+  <AuthorizationClientId />
+  <AuthorizationClientSecret />
+  <AuthorizationExchangeUrl />
+  <AuthorizationPrompt>false</AuthorizationPrompt>
+  <SaveCompact>false</SaveCompact>
+  <DisplayGroups />
+  <SwaggerSource>C:\Users\kruna\OneDrive\Desktop\swagger.json</SwaggerSource>
+  <Certificates />
+  <CreateUser>kruna</CreateUser>
+  <ChangeUser>Ritesh</ChangeUser>
+  <CreateMachine>LAPTOP-R4CBOANL</CreateMachine>
+  <ChangeMachine>UNITE-98MD8S3</ChangeMachine>
+  <AuthorizationValidateState>false</AuthorizationValidateState>
+</Project>

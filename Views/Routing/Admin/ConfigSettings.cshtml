@@ -1,0 +1,150 @@
+﻿<div class="ui mt-3">
+    <h1 class="ui header">Configuration Settings</h1>
+
+    <!-- Scrollable Table -->
+    <div class="ui segment">
+        <table class="ui table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Value</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="configTableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* <!-- Modal for showing audit history -->
+<div class="ui modal" id="auditHistoryModal">
+    <div class="header">Audit History</div>
+    <div class="content">
+        <table class="ui table">
+            <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Previous Value</th>
+                    <th>New Value</th>
+                </tr>
+            </thead>
+            <tbody id="auditHistoryBody">
+            </tbody>
+        </table>
+    </div>
+    <div class="actions">
+        <div class="ui button" onclick="$('#auditHistoryModal').modal('hide');">Close</div>
+    </div>
+</div> *@
+
+<script>
+    var configsettings = {};
+    configsettings.data = {};
+    //configsettings.auditData = {};
+    configsettings.objPost = {
+        "Id": 0,
+        "Value": ""
+    }
+
+    // Function to fetch all the configurations
+    configsettings.fetchConfigurations = function () {
+        return $.ajax({
+            url: 'api/admin/config-settings',
+            method: 'GET',
+            success: function (data) {
+                configsettings.data = data;
+                configsettings.loadConfigData();
+            }
+        });
+    };
+
+    // Function to load configuration data as table rows
+    configsettings.loadConfigData = function () {
+        var configRows = '';
+
+        configsettings.data.forEach(function (config) {
+            configRows += `
+                                <tr>
+                                    <td>${config.id}</td>
+                                    <td>${config.name}</td>
+                                    <td>${config.description || 'N/A'}</td>
+                                    <td class="ui form field"><textarea rows="2" cols="70">${config.value || ''}</textarea></td>
+                                    <td>
+                                        <div class="ui buttons">
+                                            <button class="ui primary labeled icon button" style="margin-right: 10px;" onclick="configsettings.updateConfiguration(this);"><i class="save icon"></i>Update</button>
+                                            <button class="ui circular icon button" data-tooltip="View History" data-position="top center"><i class="history icon"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+        });
+
+        $('#configTableBody').html(configRows);
+        $('.ui.button').popup();
+    };
+
+    // Function to bind data for update
+    configsettings.bindData = function (button) {
+        var row = $(button).closest('tr');
+
+        configsettings.objPost.Id = row.find('td:nth-child(1)').text();
+        configsettings.objPost.Value = row.find('textarea').val();
+    };
+
+    // Function to update the configuration
+    configsettings.updateConfiguration = function (button) {
+        configsettings.bindData(button);
+        $.ajax({
+            url: 'api/admin/config-settings',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(configsettings.objPost),
+            success: function (response) {
+                helper.SuccessToast("UPDATE_SUCCESS");
+                configsettings.fetchConfigurations();
+            }
+        });
+    };
+
+    // // Function to view the history of a configuration's field
+    // configsettings.viewHistory = function (button) {
+    //     var row = $(button).closest('tr');
+    //     var fieldName = row.find('td:nth-child(2)').text();
+
+    //     $.ajax({
+    //         url: `api/helper/1/${fieldName}`,
+    //         method: 'GET',
+    //         success: function (auditData) {
+    //             configsettings.auditData = auditData;
+    //             configsettings.loadAuditHistory();
+
+    //             $('#auditHistoryModal').modal('show');
+    //         }
+    //     });
+    // };
+
+    // // Function to load audit history data
+    // configsettings.loadAuditHistory = function () {
+    //     var auditRows = '';
+
+    //     configsettings.auditData.forEach(function (audit) {
+    //         auditRows += `
+    //                             <tr>
+    //                                 <td>${audit.fieldName}</td>
+    //                                 <td>${audit.previousValue || 'N/A'}</td>
+    //                                 <td>${audit.newValue || 'N/A'}</td>
+    //                             </tr>
+    //                         `;
+    //     });
+
+    //     $('#auditHistoryBody').html(auditRows);
+    // };
+
+    $(document).ready(function () {
+        configsettings.fetchConfigurations();
+    });
+
+</script>

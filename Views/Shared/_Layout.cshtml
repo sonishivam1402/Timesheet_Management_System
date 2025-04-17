@@ -1,0 +1,65 @@
+﻿@model UCITMS.Models.UserDTO
+
+@{
+    var version = "2.0";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] UCITMS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css?ver=@version" />
+    <link rel="stylesheet" href="~/UCITMS.styles.css?ver=@version" asp-append-version="true" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css?ver=@version">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css?ver=@version">
+    <link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css?ver=@version">
+    <link rel="stylesheet" href="~/css/site.css?ver=@version" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js?ver=@version"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js?ver=@version"></script>
+    <script>
+        dayjs.extend(dayjs_plugin_utc);
+    </script>
+</head>
+<body>
+    <div class="container-fullheight">
+        <header>
+            @await Html.PartialAsync("_Navbar", Model)
+            @Html.Partial("_PageLock")
+
+
+        </header>
+        <div class="content-wrapper">
+            <div class="sidebar">
+                @await Component.InvokeAsync("LeftMenu", new { selectedMenuPath = Context.Request.Path.Value })
+            </div>
+            <main role="main" class="main-content pb-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer>
+            @await Html.PartialAsync("_Footer", Model)
+        </footer>
+    </div>
+
+
+    <!-- ag-Grid JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ag-grid/32.3.3/ag-grid-community.noStyle.js?ver=@version"></script>
+    <!-- Lodash Library -->
+    <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js?ver=@version"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js?ver=@version"></script>
+    <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.15/jspdf.plugin.autotable.min.js?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js?ver=@version"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js?ver=@version"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js?ver=@version"></script>
+    <script src="~/js/helper.js?ver=@version"></script>
+    <script src="~/js/underscore-umd-min.js?ver=@version"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

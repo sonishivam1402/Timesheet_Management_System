@@ -1,0 +1,442 @@
+﻿<link rel="stylesheet" type="text/css" href="~/css/Dashboard.css" />
+
+<div class="ui fluid-container" style="display: flex; justify-content: right; margin-top: 10px; margin-right: 20px">
+    <button id="downloadPdfBtn" class="ui primary button">Download PDF</button>
+    <button id="downloadCsvBtn" class="ui primary button">Download CSV</button>
+</div>
+
+@* CARDS *@
+<div class="mt-5 header-container3">
+    <div class="ui two column stackable grid container centered">
+        <div class="column">
+            <div class="ui red card">
+                <div class="content">
+                    <div class="ui center aligned huge header">Roles<i class="info circle icon info-icon small blue" data-chart="roles"></i></div>
+                    <hr />
+                </div>
+                <canvas id="rolesBarChart" style="height: 420px;"></canvas>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="ui red card">
+                <div class="content">
+                    <div class="ui center aligned huge header">Engagement Scopes<i class="info circle icon info-icon small blue" data-chart="engagementScopes"></i></div>
+                    <hr />
+                </div>
+                <canvas id="engScopesPieChart" style="height: 420px;"></canvas>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="ui red card">
+                <div class="content">
+                    <div class="ui center aligned huge header">Departments<i class="info circle icon info-icon small blue" data-chart="departments"></i></div>
+                    <hr />
+                </div>
+                <canvas id="deptDoughnutChart" style="height: 420px;"></canvas>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="ui red card">
+                <div class="content">
+                    <div class="ui center aligned huge header">Locations<i class="info circle icon info-icon small blue" data-chart="locations"></i></div>
+                    <hr />
+                </div>
+                <canvas id="locPolarChart" style="height: 420px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--MODAL-->
+<div id="chartDataModal" class="ui small centered modal" style="max-height: 50vh; ">
+    <i class="close icon"></i>
+    <div>
+        <i class="ui large close icon" onclick="$('#chartDataModal').modal('hide'); "></i>
+    </div>
+    <div class="ui centered huge header">Chart Details</div>
+    <div class="centered content">
+        <div id="chartDataGrid" class="ag-theme-alpine" style="height: 200px; width: 99%; margin: auto; "></div>
+    </div>
+</div>
+
+<!--JAVASCRIPT-->
+<script>
+    var adminDashboard = {};
+
+    adminDashboard.chartData = {};
+    adminDashboard.gridApi = null;
+    adminDashboard.gridColumnApi = null;
+
+    adminDashboard.adminDashRoles = function () {
+        fetch('/api/admin/dashboard-info')
+            .then(response => response.json())
+            .then(data => {
+                var rolesData = data.filter(item => item.categoryName === "Roles");
+                var engagementScopesData = data.filter(item => item.categoryName === "EngagementScopes");
+                var departmentsData = data.filter(item => item.categoryName === "Departments");
+                var locationsData = data.filter(item => item.categoryName === "Locations");
+
+                // ROLES
+                var rolesLabels = rolesData.map(role => role.key);
+                var rolesValues = rolesData.map(role => role.value);
+                new Chart(document.getElementById('rolesBarChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: rolesLabels,
+                        datasets: [{
+                            label: 'Roles',
+                            data: rolesValues,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        layout: {
+                            padding: 30
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            datalabels: {
+                                anchor: 'center',
+                                align: 'center',
+                                color: 'white',
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value) => value
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+                // ENGAGEMENT SCOPES
+                var engScopesLabels = engagementScopesData.map(scope => scope.key);
+                var engScopesValues = engagementScopesData.map(scope => scope.value);
+                new Chart(document.getElementById('engScopesPieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: engScopesLabels,
+                        datasets: [{
+                            data: engScopesValues,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        layout: {
+                            padding: 30
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            datalabels: {
+                                color: 'white',
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value, context) => {
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2) + '%';
+                                    return percentage;
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+                // DEPARTMENTS
+                var deptLabels = departmentsData.map(dept => dept.key);
+                var deptValues = departmentsData.map(dept => dept.value);
+                new Chart(document.getElementById('deptDoughnutChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: deptLabels,
+                        datasets: [{
+                            data: deptValues,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        layout: {
+                            padding: 30
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            datalabels: {
+                                color: 'white',
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value, context) => {
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = ((value / total) * 100).toFixed(2) + '%';
+                                    return percentage;
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+                // LOCATIONS
+                var locLabels = locationsData.map(loc => loc.key);
+                var locValues = locationsData.map(loc => loc.value);
+                new Chart(document.getElementById('locPolarChart'), {
+                    type: 'polarArea',
+                    data: {
+                        labels: locLabels,
+                        datasets: [{
+                            data: locValues,
+                            backgroundColor: [
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(54, 162, 235, 0.5)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(54, 162, 235, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        layout: {
+                            padding: 30
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            datalabels: {
+                                color: 'white',
+                                font: {
+                                    weight: 'bold'
+                                },
+                                formatter: (value) => value
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+
+                document.getElementById('downloadPdfBtn').addEventListener('click', adminDashboard.downloadPdf);
+
+                // For chart data
+                adminDashboard.chartData = {
+                    roles: data.filter(item => item.categoryName === "Roles"),
+                    engagementScopes: data.filter(item => item.categoryName === "EngagementScopes"),
+                    departments: data.filter(item => item.categoryName === "Departments"),
+                    locations: data.filter(item => item.categoryName === "Locations")
+                };
+
+                document.querySelectorAll('.info-icon').forEach(icon => {
+                    icon.addEventListener('click', adminDashboard.showChartDataModal);
+                });
+            })
+    }
+
+    // Show modal
+    adminDashboard.showChartDataModal = function (event) {
+        var chartType = event.target.getAttribute('data-chart');
+        var modalTitle = document.getElementById('modalTitle');
+
+        var chartTitles = {
+            'roles': 'Roles',
+            'engagementScopes': 'Engagement Scopes',
+            'departments': 'Departments',
+            'locations': 'Locations'
+        };
+
+        var modalHeader = document.querySelector('#chartDataModal .huge.header');
+        if (modalHeader) {
+            modalHeader.textContent = chartTitles[chartType];
+        }
+
+        var chartData = adminDashboard.chartData[chartType].map(item => ({
+            key: item.key,
+            value: item.value,
+            percentage: ((item.value / adminDashboard.chartData[chartType].reduce((a, b) => a + b.value, 0)) * 100).toFixed(2) + '%'
+        }));
+
+        adminDashboard.initializeGrid(chartData, chartType);
+
+        $('#chartDataModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true
+        }).modal('show');
+    }
+
+    // Initialize grid
+    adminDashboard.initializeGrid = function (data, chartType) {
+        if (this.gridApi) {
+            this.gridApi.destroy();
+        }
+
+        var columnConfigs = {
+            'roles': [
+                { headerName: 'Role Name', field: 'key', sortable: true, filter: true },
+                { headerName: 'Count', field: 'value', sortable: true },
+                { headerName: 'Percentage', field: 'percentage', sortable: true }
+            ],
+            'engagementScopes': [
+                { headerName: 'Scope Type', field: 'key', sortable: true, filter: true },
+                { headerName: 'Count', field: 'value', sortable: true },
+                { headerName: 'Percentage', field: 'percentage', sortable: true }
+            ],
+            'departments': [
+                { headerName: 'Department', field: 'key', sortable: true, filter: true },
+                { headerName: 'Size', field: 'value', sortable: true },
+                { headerName: 'Percentage', field: 'percentage', sortable: true }
+            ],
+            'locations': [
+                { headerName: 'Location', field: 'key', sortable: true, filter: true },
+                { headerName: 'Count', field: 'value', sortable: true },
+                { headerName: 'Percentage', field: 'percentage', sortable: true }
+            ]
+        };
+
+        var columnDefs = columnConfigs[chartType] || [
+            { headerName: 'Key', field: 'key', sortable: true, filter: true },
+            { headerName: 'Value', field: 'value', sortable: true },
+            { headerName: 'Percentage', field: 'percentage', sortable: true }
+        ];
+
+        var gridOptions = {
+            columnDefs: columnDefs,
+            rowData: data,
+            defaultColDef: {
+                flex: 1,
+                minWidth: 100,
+                resizable: true,
+            },
+            domLayout: 'autoHeight'
+        };
+
+        var gridDiv = document.querySelector('#chartDataGrid');
+        this.gridApi = agGrid.createGrid(gridDiv, gridOptions);
+    }
+
+    // Add charts and details
+    adminDashboard.addChartAndDetails = function (doc, chartId, title, chartData, yPosition) {
+        return html2canvas(document.getElementById(chartId)).then(canvas => {
+            doc.setFontSize(16);
+            doc.text(title, 105, yPosition, { align: 'center' });
+            doc.addImage(canvas.toDataURL(), 'PNG', 50, yPosition + 10, 110, 110);
+
+            doc.setFontSize(14);
+            doc.text('Chart Details:', 15, 165);
+
+            var totalValue = chartData.reduce((sum, item) => sum + item.value, 0);
+            var tableData = chartData.map(item => [
+                item.key,
+                item.value,
+                ((item.value / totalValue) * 100).toFixed(2) + '%'
+            ]);
+
+            doc.autoTable({
+                head: [['Name', 'Count', 'Percentage']],
+                body: tableData,
+                startY: yPosition + 140,
+                theme: 'grid',
+                headStyles: { fillColor: [22, 160, 133] },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 30 }
+                },
+                tableWidth: 'wrap',
+                horizontalPageBreak: true,
+                margin: { left: 15, right: 15 }
+            });
+        });
+    }
+
+    // Generate PDF
+    adminDashboard.generatePdfReport = async function (data) {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Dashboard Report', 10, 10);
+        doc.setFontSize(12);
+        doc.text('Generated on: ' + new Date().toLocaleString(), 10, 18);
+
+        var rolesData = data.filter(item => item.categoryName === "Roles");
+        var engagementScopesData = data.filter(item => item.categoryName === "EngagementScopes");
+        var departmentsData = data.filter(item => item.categoryName === "Departments");
+        var locationsData = data.filter(item => item.categoryName === "Locations");
+
+        await adminDashboard.addChartAndDetails(doc, 'rolesBarChart', 'ROLES', rolesData, 30);
+        doc.addPage();
+
+        await adminDashboard.addChartAndDetails(doc, 'engScopesPieChart', 'ENGAGEMENT SCOPES', engagementScopesData, 30);
+        doc.addPage();
+
+        await adminDashboard.addChartAndDetails(doc, 'deptDoughnutChart', 'DEPARTMENTS', departmentsData, 30);
+        doc.addPage();
+
+        await adminDashboard.addChartAndDetails(doc, 'locPolarChart', 'LOCATIONS', locationsData, 30);
+
+        doc.save('Dashboard_Report.pdf');
+    }
+
+    // Download PDF
+    adminDashboard.downloadPdf = function () {
+        fetch('/api/admin/dashboard-info')
+            .then(response => response.json())
+            .then(data => {
+                adminDashboard.generatePdfReport(data);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        adminDashboard.adminDashRoles();
+        adminDashboard.initializeGrid();
+        document.getElementById("downloadCsvBtn").addEventListener("click", () => {
+            window.location.href = "/api/admin/download-csv";
+        });
+    });
+</script>

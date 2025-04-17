@@ -1,0 +1,242 @@
+﻿@{
+    var version = "1.0";
+}
+
+
+<link rel="stylesheet" type="text/css" href="~/css/Reports.css?ver=@version" asp-append-version="true" />
+<link href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css" rel="stylesheet" />
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.toolbar.min.js"></script>
+<script src="https://cdn.webdatarocks.com/latest/webdatarocks.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+
+<div id="mainContainer">
+<div class="ui form segment initial">
+    <div class="fields">
+        <div class="sixteen wide field">
+            <div class="ui selection dropdown small">
+                <input type="hidden" name="views" />
+                <i class="dropdown icon"></i>
+                <div class="default text">Default View</div>
+                <div id="viewsDropdown" class="scrollhint menu">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="height:100vh;" class="ui form segment initial">
+    <i class="download icon" id="downloadCsvBtn"><br /><span id="heading">Export</span></i>
+    <div id="manager-report-container"></div>
+</div>
+</div>
+
+<!-- Card for no managed users assigned -->
+<div class="ui segment" id="noManagedUsersMessage" style="display: none; width: 600px;">
+    <div class="ui icon message">
+        <i class="user times icon"></i>
+        <div class="content">
+            <div class="header">No Users Assigned to You</div>
+            <p>You currently don't have any assigned users under your management.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropdown = document.getElementById("viewsDropdown");
+        const noManagedUsersMessage = document.getElementById("noManagedUsersMessage");
+        const exportButton = document.getElementById("downloadCsvBtn");
+        const mainGrid = document.getElementById("mainContainer");
+        let pivot1;
+
+        function safeParseJSON(jsonString, defaultValue = {}) {
+            try {
+                return JSON.parse(jsonString);
+            } catch (error) {
+                return defaultValue;
+            }
+        }
+
+        function initializePivotReport(csvData, selectedSlice, selectedFormats) {
+            
+            pivot1.setReport({
+                dataSource: {
+                    dataSourceType: "csv",
+                    filename: "data:text/csv;charset=utf-8," + encodeURIComponent(csvData),
+                },
+                slice: selectedSlice,
+                formats: selectedFormats || [
+                    {
+                        name: "number",
+                        thousandsSeparator: ",",
+                        decimalPlaces: 2
+                    }
+                ]
+            });
+        }
+
+        function loadViewData(selectedID, selectedSlice, selectedFormats) {
+            fetch(`api/Reports/timesheetsummary/${selectedID}`, {
+                headers: {
+                    'Accept': 'text/csv',
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to fetch manager report");
+                    return response.text();
+                })
+                .then(csvData => {
+                    console.log(csvData);
+                    if (!csvData || csvData.trim().length === 0) {
+                        mainGrid.style.display = "none";
+                        noManagedUsersMessage.style.display = "block";
+                        exportButton.style.display = "none";
+                        
+                        return;
+                    }
+
+                    noManagedUsersMessage.style.display = "none";
+                    exportButton.style.display = "inline-block";
+
+                    initializePivotReport(csvData, selectedSlice, selectedFormats);
+                })
+                .catch(error => {
+                    console.error(error);
+                    mainGrid.style.display = "none";
+                    noManagedUsersMessage.style.display = "block";
+                    exportButton.style.display = "none";
+                });
+        }
+
+        fetch('/api/Reports/getview')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch views');
+                }
+                return response.json();
+            })
+            .then(viewNames => {
+                dropdown.innerHTML = '';
+
+                viewNames.forEach((view, index) => {
+                    const option = document.createElement("div");
+                    option.className = "item";
+                    option.setAttribute("data-value", view.viewName);
+                    option.setAttribute("data-id", view.id);
+                    option.setAttribute("data-slice", JSON.stringify(safeParseJSON(view.slice)));
+                    option.setAttribute("data-formats", JSON.stringify(safeParseJSON(view.formats)));
+                    option.textContent = view.viewName;
+
+                    if (view.forSU === true) {
+                        option.style.backgroundColor = "#ffe7a6";
+                        option.style.border = '0.5px solid #9ac6d6';
+                        option.onmouseover = function () {
+                            option.style.backgroundColor = "#ccb884";
+                        }
+                        option.onmouseout = function () {
+                            option.style.backgroundColor = "#ffe7a6";
+                        }
+                    } else {
+                        option.style.backgroundColor = "white";
+                        option.style.border = '0.5px solid #9ac6d6';
+                        option.onmouseover = function () {
+                            option.style.backgroundColor = "#b2b2b2";
+                        }
+                        option.onmouseout = function () {
+                            option.style.backgroundColor = "white";
+                        }
+
+                    }
+
+                    dropdown.appendChild(option);
+                });
+
+                $('.ui.dropdown').dropdown({
+                    onChange: function (value, text, $choice) {
+                        const selectedID = $choice.data('id');
+                        const selectedSlice = $choice.data('slice');
+                        const selectedFormats = $choice.data('formats');
+
+                        loadViewData(selectedID, selectedSlice, selectedFormats);
+                    }
+                });
+
+                // Initializing WebDataRocks Grid
+                pivot1 = new WebDataRocks({
+                    container: "#manager-report-container",
+                    toolbar: true,
+                    width: "100%",
+                    height: "100%",
+                    beforetoolbarcreated: function (toolbar) {
+                        let tabs = toolbar.getTabs();
+                        toolbar.getTabs = function () {
+                            return tabs.filter(tab =>
+                                !["wdr-tab-connect", "wdr-tab-open", "wdr-tab-save", "wdr-tab-export", "wdr-tab-fullscreen"]
+                                    .includes(tab.id)
+                            );
+                        }
+                    },
+                    report: {
+                        dataSource: {
+                            dataSourceType: "csv",
+                            filename: ""
+                        }
+                    }
+                });
+
+                // Getting data for first view to load on page load
+                if (viewNames.length > 0) {
+                    const firstView = viewNames[0];
+                    $('.ui.dropdown').dropdown('set selected', firstView.viewName);
+                    loadViewData(
+                        firstView.id,
+                        safeParseJSON(firstView.slice),
+                        safeParseJSON(firstView.formats)
+                    );
+                }
+            })
+            .catch(error => {
+                mainGrid.style.display = "none";
+
+                console.error('Error fetching views:', error);
+                noManagedUsersMessage.style.display = "block";
+            });
+
+        exportButton.addEventListener("click", () => {
+            function downloadExcelFile() {
+                const selectedView = $('.ui.dropdown').dropdown('get value');
+                const selectedID = $('.ui.dropdown .item[data-value="' + selectedView + '"]').data('id');
+
+                fetch(`api/Reports/timesheetsummary/${selectedID}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/csv'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(csvData => {
+                        const rows = csvData.split('\n').map(row => row.split(','));
+
+                        if (rows.length <= 1) {
+                            alert('No data available to export');
+                            return;
+                        }   
+
+                        const worksheet = XLSX.utils.aoa_to_sheet([...rows.slice(0)]);
+
+                        const workbook = XLSX.utils.book_new();
+                        XLSX.utils.book_append_sheet(workbook, worksheet, "Timesheet Report");
+
+                        // Download file
+                        XLSX.writeFile(workbook, "Timesheet_Report.xlsx");
+                    })
+            }
+            downloadExcelFile();
+        });
+    });
+</script>

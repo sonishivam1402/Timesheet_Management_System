@@ -1,0 +1,240 @@
+﻿<link rel="stylesheet" href="/css/ApprovalStatus.css" />
+
+<div class="main-component">
+    <div class="ui grid padded main-component_heading">
+        @*margin for heading*@
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">Approval Status</h1>
+        </div>
+
+    </div>
+    <div id="managerTable" class="ag-theme-alpine main-component_body"></div>
+</div>
+<div class="ui tiny modal" id="openConfirmationModal">
+    <div class="header" id="confirmationHeader"></div>
+    <div class="content">
+        <p id="confirmationMessage"></p>
+    </div>
+    <div class="actions">
+        <button class="ui red deny button">No</button>
+        <button class="ui green approve button" id="confirmButton">Yes</button>
+    </div>
+</div>
+
+<!-- Page Loader -->
+<div id="pageLoader">
+    <div class="ui active large loader"></div>
+    <p>Loading</p>
+</div>
+
+<script>
+    var notifiedApprover = {};
+
+    notifiedApprover.renderTable = function (managerData) {
+        const columnDefs = [
+            { headerName: "#", field: "index", sortable: true, width : 75 },
+            { headerName: "Employee Name", field: "userName", sortable: true, filter: true},
+            { headerName: "Manager Name", field: "managerName", sortable: true, filter: true },
+            { headerName: "Timesheet Duration", field: "tsDuration", sortable: true, filter: true },
+            {
+                headerName: "Pending Since (Days)", field: "daysDue", sortable: true, filter: true,
+                cellRenderer: function (params) {
+                    const pendingSince = parseInt(params.data.daysDue, 10);
+                    let labelClass = 'basic';
+
+                    if (pendingSince >= 15) {
+                        labelClass = 'red';
+                    } else if (pendingSince >= 7) {
+                        labelClass = 'orange';
+                    } else if (pendingSince < 7) {
+                        labelClass = 'blue';
+                    }
+
+                    return `<div class="ui ${labelClass} basic label">${pendingSince} Days</div>`;
+                }
+            },
+            {
+                headerName: "Actions",
+                cellStyle: {
+                    textAlign: 'center',
+                    fontSize: '16px'
+                },
+                cellRenderer: function (params) {
+                    const pendingSince = parseInt(params.data.daysDue, 10);
+                    let isDisabled = '';
+
+                    if (pendingSince <= 3) {
+                        isDisabled = 'disabled';
+                    }
+
+                    return `<button onclick="notifiedApprover.openConfirmationModal('${params.data.managerId}', '${params.data.userID}', '${params.data.timesheetID}', '${params.data.managerName}', '${params.data.tsDuration}')"
+                                        class="mb-1 ui button blue approve button notify-btn" ${isDisabled}>
+                                        Notify
+                                        </button>`;
+                },
+                pinned: 'right',
+                lockPinned: true
+            },
+            { headerName: "Last Notified On", field: "lastNotifiedOn", sortable: true, filter: true, width: 180 }
+        ];
+
+        const rowData = managerData.map((manager, index) => ({
+            index: index + 1,
+            userName: manager.userName || '--',
+            managerName: manager.managerName || '--',
+            tsDuration: manager.tsDuration,
+            daysDue: manager.daysDue,
+            managerId: manager.managerId,
+            userID: manager.userID,
+            timesheetID: manager.timesheetID,
+            lastNotifiedOn: manager.lastNotifiedOn ? helper.ToLocalDate2(manager.lastNotifiedOn) : '--'
+        }));
+
+            const gridOptions = {
+                columnDefs: columnDefs,
+                suppressMovable: true,
+                suppressDragLeaveHidesColumns: true,
+                rowData: rowData,
+                pagination: true,
+                paginationPageSize: 100,
+                paginationPageSizeSelector: [10, 25, 50, 100],
+                onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+                },
+                onFirstDataRendered: function(params) {
+                    $('.pending-since').each(function () {
+                        const pendingSince = parseInt($(this).text(), 10);
+                        const notifyButton = $(this).closest('tr').find('.notify-btn');
+                        if (pendingSince > 3) {
+                            notifyButton.prop('disabled', false);
+                        } else {
+                            notifyButton.prop('disabled', true);
+                        }
+                    });
+                }
+            };
+
+        const eGridDiv = document.querySelector('#managerTable');
+        new agGrid.Grid(eGridDiv, gridOptions);
+    };
+
+
+    notifiedApprover.sendMail = function (managerId, userID, timesheetID) {
+        // Show loader
+        $('#pageLoader').fadeIn();
+
+        const data = {
+            ManagerId: managerId,
+            UserID: userID,
+            TimesheetID: timesheetID
+        };
+
+        $.ajax({
+            url: '/api/HRAdmin/sendpendingEmail',
+            method: 'POST',
+            contentType: 'application/json', 
+            data: JSON.stringify(data), 
+            success: function (response) {
+                helper.SuccessToast("Email Sent");
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+            },
+            error: function (err) {
+                helper.ErrorToast(err.responseJSON.error || "Failed to Send Email");
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+            }
+        });
+    };
+
+
+    notifiedApprover.saveNotification = async function (managerId, userID, timesheetID) {
+        const currentDateTime = new Date().toISOString();
+        const formattedDate = helper.ToLocalDate2(currentDateTime);
+
+        const response = await fetch('/api/HRAdmin/SaveNotifiedEmailLog', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                managerID: managerId,
+                userID: userID,
+                timesheetID: timesheetID,
+                sentOn: currentDateTime
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.dateTime;
+        } else {
+            console.error('Failed to save DateTime');
+            return null;
+        }
+    };
+
+    function debounce(func, delay) {
+        let timeout;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    notifiedApprover.openConfirmationModal = function (managerId, userID, timesheetID, managerName, tsDuration) {
+        let message = `Are you sure you want to send the reminder Email to <span style="color: blue;"> '${managerName}'</span> for the Timesheet Duration <span style="color: blue;">'${tsDuration}'</span> ?`;
+        // $('#confirmationMessage').text(message);
+        $('#confirmationMessage').html(message);
+        $('#confirmationHeader').text("Please Confirm");
+
+        $('#confirmButton').off('click').on('click', debounce(function () {
+            $('#openConfirmationModal').modal('hide');
+            $('#NotifyModal').removeClass('dimmed');
+            $('.ui.dimmer.modals').removeClass('visible').addClass('hidden');
+
+            notifiedApprover.sendMail(managerId, userID, timesheetID);
+            notifiedApprover.saveNotification(managerId, userID, timesheetID);
+        }, 500));
+
+        $('.deny.button').off('click').on('click', function () {
+            $('#openConfirmationModal').modal('hide');
+            $('#NotifyModal').removeClass('dimmed');
+
+            setTimeout(function () {
+                $('#NotifyModal').modal('show');
+            }, 300);
+        });
+
+        $('#NotifyModal').addClass('dimmed');
+        $('#openConfirmationModal').modal({
+            allowMultiple: true,
+            closable: false,
+            dimmer: true,
+            autofocus: false
+        }).modal('show');
+    };
+
+    notifiedApprover.fetchNotifiedData = function () {
+        $.ajax({
+            url: '/api/HRAdmin/getnotifieddata',
+            method: 'GET',
+            success: function (response) {
+                notifiedApprover.renderTable(response);
+            },
+            error: function (error) {
+                console.error(error);
+            },
+                 complete: function () {
+                // Hide loader
+                $('#pageLoader').fadeOut();
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        notifiedApprover.fetchNotifiedData();
+    });
+</script>

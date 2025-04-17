@@ -1,0 +1,73 @@
+﻿<style>
+    header {
+        font-size: 1.5em;
+    }
+
+    .item {
+        font-size: 1.2em; 
+    }
+
+    .ui.vertical.menu {
+        width: 17rem;
+    }
+
+    .ui.menu {
+        margin: 0;
+    }
+</style>
+
+<div class="ui vertical menu">
+    <div class="item">
+        <div class="header x-large">HR Admin</div>
+        <div class="menu">
+            <a class="item huge" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bars icon"></i> HR Admin Dashboard
+            </a>
+            <a class="item huge" asp-area="" asp-controller="asdf" asp-action="asdf">
+                <i class="file alternate icon"></i> Approval Status
+            </a>
+            <a class="item huge" asp-area="" asp-controller="HRAdmin" asp-action="AssignApprover">
+                <i class="users icon"></i> Assign Approver
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="tasks icon"></i> Engagement Status
+            </a>
+        </div>
+    </div>
+
+    <div class="item">
+        <div class="header huge">Reporting Manager</div>
+        <div class="menu">
+            <a class="item huge" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bars icon"></i> Manager Dashboard
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="file alternate icon"></i> Pending Approval
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="users icon"></i> Approved Timesheets
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="tasks icon"></i> Manage My Engagements
+            </a>
+        </div>
+    </div>
+
+    <div class="item">
+        <div class="header huge">Employee</div>
+        <div class="menu">
+            <a class="item huge" asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bars icon"></i> Employee Dashboard
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="file alternate icon"></i> Add new Timesheet
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="users icon"></i> View Previous Timesheets
+            </a>
+            <a class="item huge" asp-area="" asp-controller="" asp-action="">
+                <i class="tasks icon"></i> My Engagements
+            </a>
+        </div>
+    </div>
+</div>

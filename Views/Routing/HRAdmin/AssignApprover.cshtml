@@ -1,0 +1,490 @@
+﻿<div class="ui warning message accordion timesheet-rules" style="width:98.5%;">
+    <div class="title">
+        <i class="dropdown icon"></i>
+        <strong>Rules & Guidelines</strong>
+    </div>
+    <div class="content">
+        <div class="ui bulleted list">
+            <div class="item">User and Primary Approver are mandatory while Assigning.</div>
+            <div class="item">Only Managers can be Primary Approvers.</div>
+            <div class="item">User cannot be their own Approver (Primary or Secondary).</div>
+            <div class="item">Primary and Secondary Approver cannot be same.</div>
+        </div>
+    </div>
+</div>
+
+<div class="main-component">
+    <!-- HEADING -->
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">Assign Approver</h1>
+        </div>
+        <div class="eight wide column right aligned">
+            <button class="ui green button large" id="assignBtn" onclick="userManagerInfo.showModal()"><i class="ui plus icon"></i>Assign</button>
+        </div>
+    </div>
+
+    <!-- GRID -->
+    <div id="myGrid" class="ag-theme-alpine main-component_body"></div>
+</div>
+<!-- MODAL for Assign Approver -->
+<div class="ui medium modal" id="approverModal" style="display:none; height:auto;">
+    <h1 class="ui center aligned header x-large" id="modalHeader">Assign Approver</h1>
+
+    <div class="content" style="overflow-y: auto;">
+        <div class="ui form">
+            <div class="ui large header field">
+                <label id="userLabel">User</label>
+
+                <div id="userDisplay" class="ui input" style="display: none;">
+                    <span id="selectedUserName" class="ui medium header"></span>
+                </div>
+
+                <div class="ui search selection dropdown" id="ddlUser">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select User</div>
+                    <div class="menu" id="ddlUserMenu"></div>
+                </div>
+            </div>
+            <div class="ui large header field">
+                <label>Primary Approver</label>
+                <div class="ui search selection dropdown" id="ddlPrimaryApprover">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large; ">Select Approver</div>
+                    <div class="menu" id="ddlPrimaryApproverMenu" style="max-height: 150px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            <div class="ui large header field">
+                <label>Secondary Approver</label>
+                <div class="ui search selection dropdown upward" id="ddlSecondaryApprover">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Approver</div>
+                    <div class="menu" id="ddlSecondaryApproverMenu" style="max-height: 185px;"></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="actions ui m-3">
+            <button class="ui large blue right floated button" id="savebtn"><i class="ui save icon"></i> Save</button>
+            <button class="ui large red right floated button" id="closeModal" onclick="userManagerInfo.closeModal()"><i class="ui cancel icon"></i>Cancel</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script>
+    // Created an empty object array
+    var userManagerInfo = {};
+    userManagerInfo.currentAction = "";
+
+    // Created an object insided the array to store values for POST
+    userManagerInfo.objPost = {
+        "userId": null,
+        "primaryManagerId": null,
+        "secondaryManagerId": null,
+        "modUserId": null
+    }
+
+    // Fetching grid data
+    userManagerInfo.getGridData = async function () {
+        const response = await fetch('/api/HRAdmin/getallusermanagerinfo');
+        return await response.json();
+    };
+
+    // Fetching Data for User Dropdown
+    userManagerInfo.getUserData = async function () {
+        const response = await fetch('/api/HRAdmin/getnoapproverlist');
+        return await response.json();
+    }
+
+    // Fetching Data for Secondary Approver Dropdown
+    userManagerInfo.getAllUsers = async function () {
+        const response = await fetch('/api/HRAdmin/GetAllUsers');
+        return await response.json();
+    }
+
+    // Fetching Data for Primary Approver Dropdown
+    userManagerInfo.getAllManagers = async function () {
+        const response = await fetch('/api/HRAdmin/getallmanagers');
+        return await response.json();
+    }
+
+    //Initialize GRID
+    userManagerInfo.initializeGrid = async function () {
+        if (!_.isEmpty(userManagerInfo.objGrid)) userManagerInfo.objGrid.destroy();
+
+        const userData = await userManagerInfo.getGridData();
+        const columnDefs = [
+            {
+                headerName: 'Employee',
+                field: 'userName',
+                minWidth: 165,
+                flex: 1,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px'
+                }
+            },
+            {
+                headerName: 'Primary Approver',
+                field: 'primaryManagerName',
+                flex: 1,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px'
+                },
+                cellRenderer: (params) => {
+                    return params.value ? `<span class="user-name centered">${params.value}</span>` : '-';
+                }
+            },
+            {
+                headerName: 'Secondary Approver',
+                field: 'secondaryManagerName',
+                flex: 1,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px'
+                },
+                cellRenderer: (params) => {
+                    return params.value ? `<span class="user-name">${params.value}</span>` : '-';
+                }
+            },
+            {
+                headerName: 'Modified By ',
+                field: 'modUserName',
+                flex: 1,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px'
+                },
+                cellRenderer: (params) => {
+                    return params.value ? `<span class="user-name">${params.value}</span>` : '-';
+                }
+            },
+            {
+                headerName: 'Modified On',
+                field: 'modifiedOn',
+                minWidth: 200,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px'
+                },
+                valueFormatter: params => {
+                    return helper.ToLocalDate2(params.value);
+                }
+            },
+            {
+                headerName: 'Action',
+                cellStyle: {
+                    textAlign: 'center',
+                    fontSize: '16px'
+                },
+                cellRenderer: userManagerInfo.renderEditBtn,
+                pinned: 'right',
+                lockPinned: true,
+                sortable: false,
+                filter: false,
+                width: 105,
+                minWidth: 105
+            }
+        ];
+
+        const gridOptions = {
+            columnDefs: columnDefs,
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            rowData: userData,
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+            }
+        };
+
+        const eGridDiv = $('#myGrid')[0];
+        userManagerInfo.objGrid = new agGrid.Grid(eGridDiv, gridOptions);
+    };
+
+    // Render edit button in GRID
+    userManagerInfo.renderEditBtn = function (params) {
+        return `<button style="background-color: transparent; border: none;" onclick="userManagerInfo.edit('${params.data.userID}', '${params.data.primaryManagerName}', '${params.data.secondaryManagerName}', '${params.data.userName}')"><i class="ui blue large edit icon mb-1"></i></button>`;
+    }
+
+    // Populate Dropdowns with Respective Users
+    userManagerInfo.populateDropdown = function (dropdownId, users, filterConfig = {}) {
+        const dropdownMenu = $(`#${dropdownId}`);
+        dropdownMenu.empty();
+
+        let filteredUsers = users ? [...users] : [];
+
+        // Filter displayed username in edit mode
+        if (userManagerInfo.currentAction === 'edit') {
+            const displayedUsername = $('#selectedUserName').text();
+            filteredUsers = filteredUsers.filter(user => user.userName !== displayedUsername);
+        }
+
+        // Filter selected user from approver dropdowns
+        if (filterConfig.excludeSelectedUser) {
+            const selectedUserId = $('#ddlUser').dropdown('get value');
+            if (selectedUserId) {
+                filteredUsers = filteredUsers.filter(user => String(user.userID) !== String(selectedUserId));
+            }
+        }
+
+        // Filter primary approver from secondary dropdown only
+        if (filterConfig.excludePrimaryApprover) {
+            const primaryApproverId = $('#ddlPrimaryApprover').dropdown('get value');
+            if (primaryApproverId && primaryApproverId !== 'null') {
+                filteredUsers = filteredUsers.filter(user => String(user.userID) !== String(primaryApproverId));
+            }
+        }
+
+        if (dropdownId === 'ddlSecondaryApproverMenu') {
+            dropdownMenu.append('<div class="item" data-value="null">None</div>');
+        }
+
+        if (!filteredUsers || filteredUsers.length === 0) {
+            dropdownMenu.append('<div class="item disabled" data-value="">No available users</div>');
+        } else {
+            filteredUsers.forEach(user => {
+                dropdownMenu.append(`<div class="item" data-value="${user.userID}">${user.userName}</div>`);
+            });
+        }
+
+        $(`#${dropdownId}`).dropdown('refresh');
+    }
+
+    // Open Modal
+    userManagerInfo.openModal = async function (
+        action,
+        userID = null,
+        primaryManagerName = null,
+        secondaryManagerName = null,
+        userName = null) {
+
+        const userData = await userManagerInfo.getUserData();
+        const alluserData = await userManagerInfo.getAllUsers();
+        const managerData = await userManagerInfo.getAllManagers();
+
+        $('#modalHeader').text(action === 'assign' ? 'Assign Approver' : 'Edit Approver');
+
+        if (action === 'assign') {
+            $('#userLabel').show();
+            $('#userDisplay').hide();
+            $('#ddlUser').show();
+            userManagerInfo.currentAction = 'assign';
+            userManagerInfo.objPost.userId = null;
+        } else {
+            $('#userLabel').hide();
+            $('#userDisplay').show();
+            $('#selectedUserName').text(userName);
+            $('#ddlUser').hide();
+            userManagerInfo.currentAction = 'edit';
+            userManagerInfo.objPost.userId = userID;
+            $('#savebtn').prop('disabled', false);
+        }
+
+        const updateDropdowns = function () {
+            userManagerInfo.populateDropdown('ddlPrimaryApproverMenu', managerData, {
+                excludeSelectedUser: true
+            });
+
+            userManagerInfo.populateDropdown('ddlSecondaryApproverMenu', alluserData, {
+                excludeSelectedUser: true,
+                excludePrimaryApprover: true
+            });
+        };
+
+        // Initialize dropdowns
+        $('#ddlUser').dropdown({
+            onChange: updateDropdowns
+        });
+
+        $('#ddlPrimaryApprover').dropdown({
+            onChange: function () {
+                userManagerInfo.populateDropdown('ddlSecondaryApproverMenu', alluserData, {
+                    excludeSelectedUser: true,
+                    excludePrimaryApprover: true
+                });
+                userManagerInfo.checkDropdowns();
+            }
+        });
+
+        $('#ddlSecondaryApprover').dropdown({
+            direction: 'upward',
+            onChange: function () {
+                userManagerInfo.checkDropdowns();
+            }
+        });
+
+        // Initial dropdowns population 
+        userManagerInfo.populateDropdown('ddlUserMenu', userData);
+        updateDropdowns();
+
+        // Initial values in edit
+        setTimeout(() => {
+            if (action === 'edit') {
+                const primaryApprover = alluserData.find(user => user.userName === primaryManagerName)?.userID;
+                const secondaryApprover = alluserData.find(user => user.userName === secondaryManagerName)?.userID;
+
+                $('#ddlUser').dropdown('set selected', userID);
+                $('#ddlPrimaryApprover').dropdown('set selected', primaryApprover);
+                $('#ddlSecondaryApprover').dropdown('set selected', secondaryApprover || 'null');
+
+                userManagerInfo.initPrimary = primaryApprover;
+                userManagerInfo.initSecondary = secondaryApprover;
+
+                updateDropdowns();
+            }
+        }, 100);
+
+        $('#approverModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true,
+            onHidden: function () {
+                $('#ddlUser').dropdown('clear');
+                $('#ddlPrimaryApprover').dropdown('clear');
+                $('#ddlSecondaryApprover').dropdown('clear');
+                userManagerInfo.checkDropdowns();
+            },
+
+        }).modal('show');
+    }
+
+    // Bind the object fields with selected data
+    userManagerInfo.bindform = function () {
+        if (userManagerInfo.currentAction === 'assign') {
+            userManagerInfo.objPost.userId = $('#ddlUser').dropdown('get value');
+        }
+        userManagerInfo.objPost.primaryManagerId = $('#ddlPrimaryApprover').dropdown('get value');
+        const smId = $('#ddlSecondaryApprover').dropdown('get value');
+        userManagerInfo.objPost.secondaryManagerId = smId === 'null' || smId === '' ? null : smId;
+
+    }
+
+    // Initialize dropdowns after populating them
+    userManagerInfo.initializeDropdowns = function () {
+        $('#ddlUser').dropdown({
+            onChange: userManagerInfo.checkDropdowns
+        });
+        $('#ddlPrimaryApprover').dropdown({
+            onChange: userManagerInfo.checkDropdowns
+        });
+        $('#ddlSecondaryApprover').dropdown({
+            onChange: userManagerInfo.checkDropdowns
+        });
+
+        userManagerInfo.checkDropdowns();
+    }
+
+
+    // Check Selections to enable/disable 'Save' Btn
+    userManagerInfo.checkDropdowns = function () {
+        const userSelected = $('#ddlUser').dropdown('get value');
+        const primaryApproverSelected = $('#ddlPrimaryApprover').dropdown('get value');
+        const secondaryApproverSelected = $('#ddlSecondaryApprover').dropdown('get value');
+
+        if (secondaryApproverSelected === '') {
+            $('#ddlSecondaryApprover').dropdown('set selected', 'null');
+        }
+
+        const enableButton = (userManagerInfo.currentAction === 'assign')
+            ? (userSelected && primaryApproverSelected) && (userSelected != 'null' && primaryApproverSelected != 'null')
+            : (primaryApproverSelected != 'null' && secondaryApproverSelected &&
+                (primaryApproverSelected != userManagerInfo.initPrimary ||
+                    secondaryApproverSelected != userManagerInfo.initSecondary));
+
+        $('#savebtn').prop('disabled', !enableButton);
+
+        return enableButton;
+    }
+
+
+    // Debounce function
+    function debounce(func, delay) {
+
+        let timeout;
+        return function () {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    // Save function
+    userManagerInfo.save = function () {
+        userManagerInfo.bindform();
+
+        const isValid = userManagerInfo.checkDropdowns();
+
+        if (!isValid) {
+            helper.ErrorToast("SAVE_FAIL");
+            return; // Stop execution if validation fails
+        }
+
+        if (userManagerInfo.objPost.primaryManagerId === userManagerInfo.objPost.secondaryManagerId) {
+            helper.ErrorToast("Sorry, Approvers need to be different");
+            return; // Stop execution
+        }
+
+        if (userManagerInfo.objPost.userId === userManagerInfo.objPost.primaryManagerId || userManagerInfo.objPost.userId === userManagerInfo.objPost.secondaryManagerId) {
+            helper.ErrorToast("Sorry, User cannot be Approver");
+            return; // Stop execution
+        }
+
+        if (userManagerInfo.objPost.primaryManagerId === null) {
+            helper.ErrorToast("Please Select a Primary Approver!");
+            return; // Stop execution
+        }
+
+        // AJAX call to save the data
+        $.ajax({
+            url: 'api/HRAdmin/save',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(userManagerInfo.objPost),
+            success: function (response) {
+                if(response.status === 1) {
+                    helper.SuccessToast("SAVE_SUCCESS");
+                    userManagerInfo.initializeGrid();
+                    $('#approverModal').modal('hide');
+                }
+            },
+            error: function(err) {
+                if (err.responseJSON && err.responseJSON.message) {
+                    helper.ErrorToast("SAVE_FAIL");
+                }
+            }
+        });
+    };
+
+    // Attach debounced click event to #savebtn
+    $('#savebtn').on('click', debounce(userManagerInfo.save, 500));
+
+
+    // Edit function to open Modal with selected values
+    userManagerInfo.edit = function (userID, primaryManagerName, secondaryManagerName, userName) {
+        userManagerInfo.openModal('edit', userID, primaryManagerName, secondaryManagerName, userName);
+    }
+
+    // Close Modal
+    userManagerInfo.closeModal = function () {
+        $('#approverModal').modal('hide');
+    }
+
+    // Show Modal
+    userManagerInfo.showModal = function () {
+        userManagerInfo.openModal('assign');
+    }
+
+    // Document Ready function
+    $('document').ready(async function () {
+
+        await userManagerInfo.initializeGrid();
+        $('.ui.accordion').accordion();
+    });
+</script>

@@ -1,0 +1,168 @@
+﻿<div class="ui mt-3">
+    <h1 class="ui header">Manage Engagements</h1>
+
+    <div>
+        <div id="engagementGrid" class="ag-theme-alpine" style="height: 600px; width: 100%;"></div>
+    </div>
+</div>
+
+
+<script>
+    var engagements = {};
+    engagements.data = {};
+    engagements.postObj = {
+        "EngagementID": 0,
+        "EngagementScopeID": 0
+    }
+    engagements.scopeData = {};
+    engagements.gridOptions = null;
+
+    // Function to fetch engagement scope values
+    engagements.fetchEngagementScopes = function() {
+        $.ajax({
+            url: 'api/helper/GetLookupValues/AAFE9F22-1E4B-4E56-BEA0-63637832CADD', 
+            method: 'GET',
+            success: function (data) {
+                engagements.scopeData = data;
+                engagements.fetchEngagements();
+            }
+        });
+    }
+
+    // Function to fetch all engagements
+    engagements.fetchEngagements = function() {
+        $.ajax({
+            url: 'api/admin/engagements',
+            method: 'GET',
+            success: function (data) {
+                engagements.data = data;
+                if (engagements.gridOptions) {
+                    engagements.gridOptions.api.setRowData(engagements.data);
+                } else {
+                    engagements.initializeGrid();
+                }
+            }
+        });
+    }
+
+    // Initialize the AG Grid with data
+    engagements.initializeGrid = function () {
+        engagements.gridOptions = {
+            defaultColDef: {
+                sortable: true,
+                filter: true
+            },
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            columnDefs: [
+                {
+                    headerName: "#", 
+                    valueGetter: "node.rowIndex + 1", 
+                    width: 65, 
+                    filter: false, 
+                    sortable: false, 
+                    resizable: true
+                },
+                {
+                    field: "title",
+                    headerName: "Title",
+                    width: 250,
+                    flex: 1
+                },
+                {
+                    field: "description",
+                    headerName: "Description",
+                    width: 250,
+                    flex: 1
+                },
+                {
+                    field: "startDate",
+                    headerName: "Start Date",
+                    valueFormatter: params => helper.DateForamt1(params.value),
+                    width: 130
+                },
+                {
+                    field: "endDate",
+                    headerName: "End Date",
+                    valueFormatter: params => helper.DateForamt1(params.value),
+                    width: 130
+                },
+                {
+                    headerName: 'Engagement Scope',
+                    field: 'engagementScopeID',
+                    editable: true,
+                    width: 170,
+                    valueGetter: function (params) {
+                        var scope = engagements.scopeData.find(scope => scope.value === params.data.engagementScopeID);
+                        return scope ? scope.key : 'Unknown';
+                    },
+                    cellEditor: 'agSelectCellEditor',
+                    cellEditorParams: {
+                        values: engagements.scopeData.map(scope => scope.key),
+                    },
+                    valueSetter: function (params) {
+                        var selectedScope = engagements.scopeData.find(scope => scope.key === params.newValue);
+                        if (selectedScope) {
+                            params.data.engagementScopeID = selectedScope.value;
+                            return true; 
+                        }
+                        return false; 
+                    }
+                }
+                ,
+                {
+                    field: "modifiedBy",
+                    headerName: "Modified By",
+                    width: 130
+                },
+                {
+                    field: "modifiedOn",
+                    headerName: "Modified On",
+                    valueFormatter: params => helper.ToLocalDate2(params.value),
+                    width: 130
+                },
+                {
+                    headerName: 'Action',
+                    field: 'Action',
+                    cellRenderer: function (params) {
+                        return '<button class="ui button blue" onclick="engagements.updateEngagementScope(' + params.data.engagementID + ')">Update</button>';
+                    },
+                    width: 150,
+                    pinned:'right',
+                    filter:false,
+                    sortable: true
+                }
+            ],
+            rowData: engagements.data
+        };
+
+        new agGrid.Grid(document.getElementById('engagementGrid'), engagements.gridOptions);
+    }
+
+    engagements.updateEngagementScope = function (engagementID) {
+        var engagement = engagements.data.find(item => item.engagementID === engagementID);
+
+        engagements.postObj.EngagementScopeID = parseInt(engagement.engagementScopeID);
+        engagements.postObj.EngagementID = engagement.engagementID;
+
+        $.ajax({
+            url: 'api/admin/engagements', 
+            method: 'POST',
+            data: JSON.stringify(engagements.postObj),
+            contentType: 'application/json',
+            success: function (response) {
+                if (response.success) {
+                    helper.SuccessToast("UPDATE_SUCCESS");
+                    engagements.fetchEngagements();
+                } 
+            }
+        });
+    };
+
+    $(document).ready(function () {
+        engagements.fetchEngagementScopes();
+    });
+</script>

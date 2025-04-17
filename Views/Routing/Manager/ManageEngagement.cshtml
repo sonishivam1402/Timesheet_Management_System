@@ -1,0 +1,1525 @@
+﻿<style>
+    #engagementsGrid {
+        height: 521px;
+        width: 98%;
+        margin: 5px 0;
+        color: black;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+    }
+
+    #nav-heading {
+        font-size: xx-large;
+    }
+
+    .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        margin-right: 27px;
+    }
+
+    .ui.fullscreen.modal {
+        background-color: white;
+    }
+
+    .ui.inverted.dimmer.active{
+       height:1100px;
+    }
+
+    .ui.card {
+        width: 100%;
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+
+    .task-list {
+        max-height: 150px;
+        overflow-y: scroll;
+        margin-top: 10px;
+    }
+
+    .ui.modal {
+        display: none;
+    }
+
+    .inline-fields {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+        .inline-fields .field {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+            .inline-fields .field:last-child {
+                margin-right: 0;
+            }
+
+    .ui.form .field {
+        margin-bottom: 15px;
+    }
+
+    #task-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .task-item {
+        flex: 1 1 calc(25% - 15px);
+        display: flex;
+        align-items: center;
+    }
+
+    #task-search, #custom-task-name {
+        width: 200px;
+    }
+
+    .task-search-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .ui.form .field > label {
+        font-size: 1.1rem;
+    }
+
+    .text {
+        font-size: 1rem;
+    }
+
+    .task-edit-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    #custom-task-error {
+        color: #9f3a38;
+        background: #fff6f6;
+        border: 1px solid #e0b4b4;
+    }
+
+    /* Styling for the copy icon */
+    .copy {
+        font-size: 1.2rem; 
+        color: #4A90E2; 
+        cursor: pointer; 
+        transition: color 0.3s ease, transform 0.3s ease; 
+        margin-right: 8px; 
+    }
+
+        .copy:hover {
+            color: #1D62F0; 
+            transform: scale(1.6); 
+        }
+
+        .copy:active {
+            color: #0A45A2; 
+            transform: scale(2); 
+        }
+
+        .content{
+            margin-top:10px;
+        }
+
+        #modalTasks,#modalTeamMembers,#modalOwners {
+            margin-top: 5px;
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+        }
+
+    #openTaskEditModal{
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        height: fit-content !important;
+        max-height: 80vh;
+    }
+
+    .ui.edit.icon{
+        padding-left:10px;
+    }
+
+    .task-item.created-by-me label{
+        color: #2185d0 !important;
+    }
+
+    .dimmable.undetached.dimmed {
+        margin-right: 0px !important;
+    }
+    /* MEDIA QUERIES */
+
+    @@media screen and (min-width: 769px) and (max-width: 1024px) {
+        .ui.inverted.dimmer.active {
+            height: 1000px;
+        }
+    }
+
+    @@media screen and (min-width: 1025px) and (max-width: 1440px) {
+        .ui.inverted.dimmer.active {
+            height: 1100px;
+        }
+    }
+
+    @@media screen and (min-width: 1441px) {
+        .ui.inverted.dimmer.active {
+            height: 1450px;
+        }
+    }
+</style>
+<div class="ui warning message accordion timesheet-rules" style="width:98%;">
+    <div class="title">
+        <i class="dropdown icon"></i>
+        <strong>Rules & Guidelines</strong>
+    </div>
+    <div class="content">
+        <div class="ui bulleted list">
+            <div class="item">Team Member Dates are in sync with Engagement Dates. Any changes to Engagement Dates will be reflected in Team Member Dates as well.</div>
+            <div class="item">The creator of Engagement will be added as Owner and Team Member by default.</div>
+            <div class="item">Co-Owner will be added as Team Member by default.</div>
+            <div class="item">Copying the Engagement will copy all the Details of that Engagement. Any changes will need to be made manually.</div>
+        </div>
+    </div>
+</div>
+
+<div class="header-container">
+    <h1>List of Engagements</h1>
+    <button class="ui green button" onclick="engagements.addNew()"><i class="add icon"></i>New Engagement</button>
+</div>
+
+<!-- Grid Container -->
+<div id="engagementsGrid" class="ag-theme-alpine" style="height: 80vh;"></div>
+
+<!-- Copy Confirmation Modal -->
+<div id="copyOptionsModal" class="ui small modal" style="height: fit-content;">
+    <div class="ui center aligned header x-large">Copy Engagement</div>
+    <div class="content">
+        <p>Are you sure you want to copy this engagement?</p>
+    </div>
+    <div class="actions">
+        <button class="ui button" id="copyOptionsCancel">Cancel</button>
+        <button class="ui button primary" id="copyOptionsConfirm">Confirm</button>
+    </div>
+</div>
+
+
+<!-- Fullscreen Flyout Modal -->
+<div id="engagementModal" class="ui fullscreen modal">
+    <i id="close-icon" onclick="engagements.clearForm()" class="close icon"></i>
+    <div class="header">Add New Engagement</div>
+    <div class="content">
+        <form class="ui form segment initial">
+            <!-- Title, Start Date, End Date -->
+            <div class="inline-fields">
+                <div class="field required">
+                    <label>Project</label>
+                    <input id="title" type="text" name="title" placeholder="Engagement Title" maxlength="200" onchange="engagements.validateTitle()" oninput="engagements.validateTitle()">
+                    <div class="ui basic red pointing prompt label transition" style="display: none;">Title is required or cannot contain angle brackets (&lt; or &gt;) or comma.</div>
+                </div>
+                <div class="field required">
+                    <label>Start Date</label>
+                    <input type="date" name="start-date" id="start-date-input" onchange="engagements.updateTMStartDate(); engagements.updateEndDateMin();">
+                </div>
+                <div class="field required">
+                    <label>End Date</label>
+                    <input type="date" name="end-date" id="end-date-input" onchange="engagements.updateTMEndDate();">
+                </div>
+            </div>
+
+            <!-- Project Description -->
+            <div class="field required">
+                <label>Project Description</label>
+                <textarea id="project-description" name="description" rows="3" placeholder="Enter project description" onchange="engagements.validateDescription()" oninput="engagements.validateDescription()"></textarea>
+                <div class="ui basic red pointing prompt label transition" style="display: none;">Description is required or cannot contain angle brackets (&lt; or &gt;).</div>
+            </div>
+
+            <!-- Project Owners -->
+            <div class="field">
+                <label>Project Owners</label>
+                <select id="project-owners" class="ui search dropdown" multiple>
+                </select>
+            </div>
+
+            <!-- Team Members -->
+            <div class="field">
+                <label>Team Members</label>
+                <select name="team-members" id="team-members" onchange="engagements.updateTeamMembersTbl()" class="ui search dropdown" multiple>
+                </select>
+            </div>
+
+            <!-- Team Members Table -->
+            <div class="field">
+                <table id="team-table" class="ui celled table">
+                    <thead>
+                        <tr>
+                            <th>Team Member</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- Tasks -->
+            <div class="ui card">
+                <div class="ui grid">
+                    <div class="eight wide column">
+                        <div class="ui icon input">
+                            <input id="task-search" type="text" placeholder="Search for tasks..." onkeyup="engagements.filterTasks(this)">
+                            <i class="search icon"></i>
+                        </div>
+                        <div class="ui large label">
+                            <i class="ui check icon"></i> <span id="taskCount">0</span> Tasks Selected
+                        </div>
+                        <p><span class="ui medium blue text">* blue text indicates my tasks</span></p>
+                    </div>
+
+                    <div class="eight wide column right aligned">
+                        <div class="ui action input custom-task">
+                            <input type="text" id="custom-task-name" placeholder="Enter task" oninput="engagements.validateCustomTask()">
+                            <button type="button" onclick="engagements.addCustomTask()" id="add-custom-task" class="ui green button">
+                                <i class="plus circle icon"></i>Add Task
+                            </button>
+                        </div>
+
+                        <div class="ui basic red pointing prompt label transition" id="custom-task-error" style="display: none; margin-top: 4px;">
+                            Task name cannot contain (&lt;, &gt;, &quot;, &#39;, ,).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task List Section -->
+                <div class="field task-list" id="task-list"></div>
+            </div>
+        </form>
+    </div>
+    <div class="basic actions">
+        <div class="ui red button" onclick="engagements.clearForm()">Cancel</div>
+        <div class="ui blue button" onclick="engagements.save()"><i class="save icon"></i>Save</div>
+    </div>
+</div>
+
+<!--MODAL-->
+<div class="ui medium centered modal" id="engagementDetailsModal" style="height: auto;">
+    <h1 class="ui center aligned blue header x-large" id="systemUserModalHeader">Engagement Details</h1>
+    <div class="content">
+        <div class="ui two column very relaxed grid">
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small tag icon"></i>
+                        <div class="content">
+                            Title
+                            <div id="modalEngagementTitle" class="ui tiny text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small calendar icon"></i>
+                        <div class="content">
+                            Duration
+                            <div id="modalDurationDate" class="ui tiny text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small file alternate icon"></i>
+                        <div class="content">
+                            Description
+                            <div id="modalEngagementDescription" class="ui tiny text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small user tie icon"></i>
+                        <div class="content">
+                            Owners <span id="ownerCount"></span>
+                            <div id="modalOwners"></div>
+                        </div>
+                    </div>
+                </div>     
+            </div>
+        </div>
+        <div class="ui vertical segment">
+            <div class="ui header">
+                <i class="small users icon"></i>
+                <div class="content">
+                    Team Members <span id="teamMemberCount"></span>
+                    <div id="modalTeamMembers"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ui vertical segment">
+            <div class="ui header">
+                <i class="small users icon"></i>
+                <div class="content">
+                    Tasks <span id="tasksCount"></span>
+                    <div id="modalTasks" ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui red button" onclick="$('#engagementDetailsModal').modal('hide');">Close</button>
+    </div>
+</div>
+ <!-- Delete Confirmation modal -->
+<div id="deleteConfirmationModal" class="ui small centered modal" style="height: auto;">
+    <div class="ui center aligned blue header x-large">Confirm Delete</div>
+    <div class="content">
+        <p>Are you sure you want to delete this engagement?</p>
+    </div>
+    <div class="actions">
+        <button class="ui red button" id="deleteCancelButton" onclick="$('#deleteConfirmationModal').modal('hide');">Cancel</button>
+        <button class="ui green button" id="deleteConfirmButton" onclick="engagements.deleteEngagement()">Confirm</button>
+    </div>
+</div>
+
+@* Success modal *@
+<div id="deleteSuccessModal" class="ui small centered modal success" style="height: auto;">
+    <div class="header">
+        Delete Engagement
+    </div>
+    <div class="content">
+        <p>Engagement deleted successfully.</p>
+    </div>
+    <div class="actions">
+        <button class="ui green ok button" onclick="location.reload();">OK</button>
+    </div>
+</div>
+
+<!--Task Edit Modal-->
+<div class="ui tiny modal" id="openTaskEditModal">
+    <div class="header">Edit Task</div>
+    <div style="position: absolute; top: 15px; right: 10px; cursor: pointer;">
+        <i class="ui large close icon" onclick="$('#openTaskEditModal').modal('hide');"></i>
+    </div>
+    <div class="content">
+        <div class="ui form">
+            <div class="field">
+                <label>Task Name:</label>
+                <input type="text" name="task" id="taskName" value="">
+            </div>
+        </div>
+
+        <div class="ui segment">
+            <table class="ui very compact celled table">
+                <tbody>
+                    <tr>
+                        <td class="collapsing">Created by <span id="createdBy"></span> on <span id="createdOn"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="collapsing">Last Modified by <span id="modifiedBy"></span> on <span id="modifiedOn"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui blue button" id="updateTaskBtn">Update</button>
+        <button class="ui red button" id="deleteTaskBtn">Delete</button>
+    </div>
+</div>
+
+<script>
+    var engagements = {};
+    engagements.data = [];
+    engagements.projectOwners = [];
+    engagements.teamMembers = [];
+    engagements.username = [];
+    engagements.tasks = [];
+    engagements.checkedTasks = new Set();
+    engagements.currentUserId = null;
+
+    // Object initialized for engagement data submission
+    engagements.objPost = {
+        "EngagementID": 0,
+        "Title": "",
+        "StartDate": "",
+        "EndDate": "",
+        "EngagementCategoryID": 1,
+        "Description": "",
+        "TeamMembers": [],
+        "Tasks": [],
+        "Owners": []
+    };
+
+    // Binding the form for post
+    engagements.bindForm = function () {
+        engagements.objPost.Title = $("#title").val().trim();
+        engagements.objPost.StartDate = $("#start-date-input").val().trim();
+        engagements.objPost.EndDate = $("#end-date-input").val().trim();
+        engagements.objPost.Description = $("#project-description").val().trim();
+
+        engagements.objPost.Owners = $("#project-owners").dropdown('get value').map(function (userId) {
+            var owner = engagements.objPost.Owners.find(o => o.userID === parseInt(userId));
+            return { userID: parseInt(userId) };
+        });
+
+        engagements.objPost.TeamMembers = $("#team-table-body tr").map(function () {
+            var userId = $(this).attr('data-user-id');
+            return {
+                UserID: parseInt(userId),
+                StartDate: $(this).find('input[name="start-date"]').val(),
+                EndDate: $(this).find('input[name="end-date"]').val()
+            };
+        }).get();
+
+        if (!engagements.objPost.Owners.some(owner => owner.userID === engagements.currentUserId)) {
+            engagements.objPost.Owners.push({ userID: engagements.currentUserId });
+        }
+
+        if (!engagements.objPost.TeamMembers.some(member => member.UserID === engagements.currentUserId)) {
+            engagements.objPost.TeamMembers.push({
+                UserID: engagements.currentUserId,
+                StartDate: $("#start-date-input").val(),
+                EndDate: $("#end-date-input").val()
+            });
+        }
+
+        engagements.objPost.Owners.forEach(owner => {
+            if (!engagements.objPost.TeamMembers.some(member => member.UserID === owner.userID)) {
+                engagements.objPost.TeamMembers.push({
+                    UserID: owner.userID,
+                    StartDate: $("#start-date-input").val(),
+                    EndDate: $("#end-date-input").val()
+                });
+            }
+        });
+
+        engagements.updateCheckedTasks();
+        engagements.objPost.Tasks = Array.from(engagements.checkedTasks).map(taskID => ({ TaskID: taskID }));
+    };
+
+    engagements.validateTitle = function () {
+        var titleField = $('#title');
+        var titleError = titleField.siblings('.ui.basic.red.pointing.prompt.label');
+        if (!titleField.val().trim() || titleField.val().includes("<") || titleField.val().includes(">") || titleField.val().includes(",")) {
+            titleError.fadeIn();
+            titleField.closest('.field').addClass('error');
+            return false;
+        } else {
+            titleError.fadeOut();
+            titleField.closest('.field').removeClass('error');
+            return true;
+        }
+    };
+
+    engagements.validateDescription = function () {
+        var descriptionField = $('#project-description');
+        var descriptionError = descriptionField.siblings('.ui.basic.red.pointing.prompt.label');
+        if (!descriptionField.val().trim() || descriptionField.val().includes("<") || descriptionField.val().includes(">")) {
+            descriptionError.fadeIn();
+            descriptionField.closest('.field').addClass('error');
+            return false;
+        } else {
+            descriptionError.fadeOut();
+            descriptionField.closest('.field').removeClass('error');
+            return true;
+        }
+    };
+
+    engagements.validateCustomTask = function () {
+        var taskField = $('#custom-task-name');
+        var taskError = $('#custom-task-error');
+
+        var taskValue = taskField.val().trim();
+        if (!taskValue) {
+            taskError.fadeOut();
+            taskField.closest('.custom-task').removeClass('error');
+            taskField.css('color', '');
+            return true;
+        } else if (taskValue.includes("<") ||
+            taskValue.includes(">") ||
+            taskValue.includes("\"") ||  
+            taskValue.includes("'") || 
+            taskValue.includes(",") ) {
+            taskError.fadeIn();
+            taskField.closest('.custom-task').addClass('error');
+            taskField.css('color', '');
+            return false;
+        } else {
+            taskError.fadeOut();
+            taskField.closest('.custom-task').removeClass('error');
+            taskField.css('color', '');
+            return true;
+        }
+    };
+
+    engagements.validateInputs = function () {
+        var isTitleValid = engagements.validateTitle();
+        var isDescriptionValid = engagements.validateDescription();
+
+        var isValid = isTitleValid && isDescriptionValid;
+
+        if (!isValid) {
+            $('.ui.form').addClass('error');
+        } else {
+            $('.ui.form').removeClass('error');
+        }
+
+        return isValid;
+    };
+
+    // Save or update an engagement
+    engagements.save = function () {
+        engagements.bindForm();
+        if (!engagements.objPost.Title || !engagements.objPost.StartDate || !engagements.objPost.EndDate || !engagements.objPost.Description) {
+            helper.ErrorToast("VALIDATE");
+            return;
+        }
+
+        if (!engagements.validateInputs()) {
+            helper.ErrorToast("SAVE_FAIL");
+            return;
+        }
+
+        // Team member date validation
+        let teamDateValidationPassed = true;
+        engagements.objPost.TeamMembers.forEach(member => {
+            if (!member.StartDate || !member.EndDate) {
+                teamDateValidationPassed = false;
+            }
+        });
+
+        if (!teamDateValidationPassed) {
+            helper.ErrorToast("MISSING_DATES");
+            return;
+        }
+        var url = window.location.origin + "/api/Engagement/Save";
+        $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(engagements.objPost),
+            success: function (result) {
+                if (engagements.objPost.EngagementID == 0) {
+                    helper.SuccessToast("SAVE_SUCCESS");
+                } else {
+                    helper.SuccessToast("UPDATE_SUCCESS");
+                }
+                engagements.get();
+                engagements.clearForm();
+            },
+            error: function () {
+                helper.ErrorToast("Invalid team member date!")
+            }
+        }); 
+    };
+
+    // Function to handle the change in start/end date of the team members based on the engagement's start/end date.
+    //start date
+    engagements.updateTMStartDate = function () {
+        var engagementStartDate = $("#start-date-input").val();
+        var engagementEndDate = $("#end-date-input").val();
+
+        $('#team-table-body tr').each(function () {
+            var startDateInput = $(this).find('input[name="start-date"]');
+            var endDateInput = $(this).find('input[name="end-date"]');
+
+            startDateInput.val(engagementStartDate);
+            startDateInput.attr({ min: engagementStartDate, max: engagementEndDate });
+            endDateInput.attr('min', engagementStartDate);
+        });
+    };
+
+    //end date
+    engagements.updateTMEndDate = function () {
+        var engagementStartDate = $("#start-date-input").val();
+        var engagementEndDate = $("#end-date-input").val();
+
+        $('#team-table-body tr').each(function () {
+            var startDateInput = $(this).find('input[name="start-date"]');
+            var endDateInput = $(this).find('input[name="end-date"]');
+
+            endDateInput.val(engagementEndDate);
+            endDateInput.attr({ min: engagementStartDate, max: engagementEndDate });
+            startDateInput.attr('max', engagementEndDate);
+        });
+    }
+
+    engagements.updateEndDateMin = function () {
+        var startDate = $("#start-date-input").val();
+        var endDateInput = $("#end-date-input");
+
+        if (startDate) {
+            endDateInput.attr("min", startDate);
+            var currentEndDate = endDateInput.val();
+
+            if (currentEndDate && currentEndDate < startDate) {
+                endDateInput.val('');
+            }
+
+            endDateInput.prop("disabled", false);
+        } else {
+            endDateInput.prop("disabled", true);
+            endDateInput.val('');
+        }
+    };
+
+    // Update the table of team members
+    engagements.updateTeamMembersTbl = function () {
+        var selectedMembers = $('#team-members').val();
+        var startDate = $('#start-date-input').val();
+        var endDate = $('#end-date-input').val();
+
+        engagements.objPost.TeamMembers = [];
+
+        selectedMembers.forEach(memberId => {
+            if ($('#team-table-body').find(`[data-user-id="${memberId}"]`).length === 0) {
+                var member = engagements.teamMembers.find(m => m.userID == memberId);
+
+                if (member) {
+                    $('#team-table-body').append(`
+                                        <tr data-user-id="${member.userID}">
+                                            <td>${member.username}</td>
+                                                            <td><input type="date" name="start-date" value="${startDate}" min="${startDate}" max="${endDate}" onchange="engagements.updateTeamMemberEndDateMin(${member.userID})" /></td>
+                                                <td><input type="date" name="end-date" value="${endDate}"  min="${startDate}" max="${endDate}" /></td>
+                                        </tr>
+                                    `);
+                }
+            }
+
+            engagements.objPost.TeamMembers.push({
+                UserID: parseInt(memberId),
+                StartDate: startDate,
+                EndDate: endDate
+            });
+        });
+
+        $('#team-table-body tr').each(function () {
+            var memberId = $(this).attr('data-user-id');
+            if (!selectedMembers.includes(memberId)) {
+                $(this).remove();
+            }
+        });
+    };
+
+    // Update the end date for each team member
+    engagements.updateTeamMemberEndDateMin = function (memberId) {
+        var startDateInput = $(`#team-table-body tr[data-user-id="${memberId}"] input[name="start-date"]`);
+        var endDateInput = $(`#team-table-body tr[data-user-id="${memberId}"] input[name="end-date"]`);
+        var startDate = startDateInput.val();
+
+        if (startDate) {
+            endDateInput.attr("min", startDate);
+
+            var currentEndDate = endDateInput.val();
+            if (currentEndDate && currentEndDate < startDate) {
+                endDateInput.val('');
+            }
+
+            endDateInput.prop("disabled", false);
+        } else {
+            endDateInput.prop("disabled", true);
+            endDateInput.val('');
+        }
+    };
+
+    // Getting an engagement to populate the grid
+    engagements.get = function () {
+        var url = window.location.origin + "/api/Engagement/owner";
+        $.ajax({
+            url: url,
+            success: function (result) {
+                engagements.data = result;
+                engagements.loadgrid();
+            }
+        });
+    };
+
+    // Configure and load data into the grid
+    engagements.loadgrid = function () {
+        if (!_.isEmpty(engagements.objGrid)) engagements.objGrid.destroy();
+
+        var gridOptions = {
+            rowData: engagements.data,
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            defaultColDef: {
+                filter: true,
+                sortable: true,
+                resizable: true
+            },
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+            },
+            columnDefs: [
+                {
+                    headerName: "#", valueGetter: "node.rowIndex + 1", width: 65, filter: false, sortable: false, resizable: true},
+                {
+                    field: "title",
+                    headerName: "Engagements",
+                    width: 250,
+                    cellRenderer: (params) => {
+                        return `<span onclick="engagements.showEngagementDetails(${params.data.engagementID})" style="cursor:pointer; color:blue;">${params.data.title}</span>`;
+                    },
+                    cellRenderer: params => engagements.renderCopyIcon(params)
+                },
+                {
+                    field: "Owners",
+                    headerName: "Owner",
+                    valueGetter: params => params.data.owners ? params.data.owners.map(o => o.ownerName).join(", ") : "",
+                    width: 250
+                },
+                {
+                    field: "startDate",
+                    headerName: "Start Date",
+                    valueFormatter: params => helper.DateForamt1(params.value),
+                    width: 175
+                },
+                {
+                    field: "endDate",
+                    headerName: "End Date",
+                    valueFormatter: params => helper.DateForamt1(params.value),
+                    width: 175
+                },
+                {
+                    field: "TeamMembers",
+                    headerName: "Team Members",
+                    valueGetter: params => params.data.teamMembers ? params.data.teamMembers.length : 0,
+                    width: 130
+                },
+                {
+                    field: "tasks",
+                    headerName: "Tasks",
+                    valueGetter: params => params.data.tasks ? params.data.tasks.length : 0,
+                    width: 110
+                },
+                {
+                    field: "Status",
+                    headerName: "Status",
+                    flex: 0.5,
+                    sortable: false,
+                    cellRenderer: function (params) {
+                        return params.data.isActive
+                            ? '<label class="fluid ui green basic label mt-2 centered">Active</label>'
+                            : '<label class="fluid ui red basic label mt-2 centered">InActive</label>';
+                    },
+                },
+                {
+                    field: "engagementID",
+                    headerName: "Action",
+                    cellRenderer: engagements.renderActionButtons,
+                    pinned: 'right',
+                    width: 130,
+                    filter: false,
+                    sortable: false,
+                    resizable: false
+                }
+            ]
+        };
+
+        var gridDiv = document.querySelector("#engagementsGrid");
+        engagements.objGrid = new agGrid.Grid(gridDiv, gridOptions);
+    };
+
+    // Render Copy Icon
+    engagements.renderCopyIcon = params => {
+        
+        var wrapper = document.createElement("div");
+        wrapper.className = "engagement-title-wrapper";
+
+        // Create the copy icon
+        var copyIcon = document.createElement("span");
+        copyIcon.className = "copy"; 
+        copyIcon.innerHTML = '<i class=" blue copy icon"></i>'; // Fomantic-UI copy icon
+        copyIcon.style.cursor = "pointer";
+        copyIcon.style.marginRight = "5px";
+        copyIcon.title = "Copy Engagement";
+
+        copyIcon.addEventListener("click", () => engagements.handleCopy(params.data.engagementID));
+
+        var title = document.createElement("span");
+        title.textContent = params.value;
+
+        // Append the icon and title to the wrapper
+        wrapper.appendChild(copyIcon);
+        wrapper.appendChild(title);
+
+        return wrapper;
+    };
+
+    // Handle Copy Logic
+    engagements.handleCopy = function (id) {
+        engagements.objPost.EngagementID = 0; // Ensure we track the current engagement ID
+        $('#header').text('Copy Engagement'); // Update the header for clarity
+
+        // Find the engagement data based on the provided ID
+        var copyItem = _.first(_.where(engagements.data, { engagementID: id }));
+        if (!copyItem) {
+            console.error("Item with id", id, "not found.");
+            return;
+        }
+
+        // Load related data (users, tasks, etc.) before showing the modal
+        Promise.all([
+            engagements.getUsers("projectOwners", "project-owners"),
+            engagements.getUsers("teamMembers", "team-members"),
+            engagements.getTasks()
+        ]).then(() => {
+            let copyData = { ...copyItem };
+            copyData.engagementID = null;
+            // Populate the form with data from the selected engagement
+            engagements.populateForm(copyData);
+
+            // Show the modal for copying
+            $('#copyOptionsModal').modal({
+                onApprove: () => false,
+                centered: true,
+                detachable: false,
+                closable: true
+            }).modal('show');
+
+            // Handle the confirmation action for copying
+            $('#copyOptionsConfirm').off('click').on('click', () => {
+                $('#copyOptionsModal').modal('hide'); // Hide the modal
+
+                // Create a new engagement with copied data
+                engagements.addNew(copyData);
+            });
+        });
+
+        $('#copyOptionsCancel').off('click').on('click', () => {
+            $('#copyOptionsModal').modal('hide');
+        });
+    };
+
+
+    // Render action button in grid come
+    engagements.renderActionButtons = function (params) {
+        return `
+            <div class="mt-2" style="display: flex; gap: 8px;">
+                <button style="background-color: transparent; border: none;" onclick="engagements.edit(${params.value})">
+                    <i class="ui blue large edit icon"></i>
+                </button>
+                    <button style="background-color: transparent; border: none;" onclick="engagements.confirmDelete(${params.value})">
+                    <i class="ui red large trash alternate icon"></i>
+                </button>
+            </div>
+        `;
+    };
+
+    engagements.showEngagementDetails = function (engagementId) {
+        var engagement = engagements.data.find(item => item.engagementID === engagementId);
+        if (engagement) {
+            $('#modalEngagementTitle').text(engagement.title);
+            $('#modalEngagementDescription').text(engagement.description);
+            $('#modalDurationDate').text(helper.DateForamt1(engagement.startDate) + "  to  " + helper.DateForamt1(engagement.endDate));
+            $('#ownerCount').text(" ("+engagement.owners.length+")");
+            var ownersContainer = $('#modalOwners').empty();
+            engagement.owners.forEach(owner => {
+                var label = $('<label>')
+                    .addClass('ui label')
+                    .text(owner.ownerName);
+
+                ownersContainer.append(label);
+            });
+
+            $('#teamMemberCount').text(" (" + engagement.teamMembers.length + ")");
+            var teamMembersContainer = $('#modalTeamMembers').empty();
+            engagement.teamMembers.forEach(teamMember => {
+                var label = $('<label>')
+                    .addClass('ui label') 
+                    .text(teamMember.teamMemberName); 
+
+                teamMembersContainer.append(label);
+            });
+
+            $('#tasksCount').text(" (" + engagement.tasks.length + ")");
+            var tasksContainer = $('#modalTasks').empty();
+            engagement.tasks.forEach(task => {
+                var label = $('<label>')
+                    .addClass('ui label')
+                    .text(task.taskName);
+
+                tasksContainer.append(label);
+            });
+
+            $('#engagementDetailsModal').modal({
+                centered: true,
+                detachable: false,
+                closable: true
+            }).modal('show');
+        }
+    }
+
+    // Edit function with existing data
+    engagements.edit = function (id) {
+        engagements.objPost.EngagementID = id;
+        $('#header').text('Edit Engagement');
+        var thisitem = _.first(_.where(engagements.data, { engagementID: id }));
+        if (!thisitem) {
+            console.error("Item with id", id, "not found.");
+            return;
+        }
+
+        Promise.all([
+            engagements.getUsers("projectOwners", "project-owners"),
+            engagements.getUsers("teamMembers", "team-members"),
+            engagements.getTasks()
+        ]).then(() => {
+            engagements.populateForm(thisitem);
+            $('#engagementModal').modal({
+                allowMultiple:true
+            }).modal('show');
+        }).catch(error => {
+            console.error("Error loading data for edit:", error);
+        });
+    };
+
+    // Populate form fields
+    engagements.populateForm = function (data) {
+        $('#title').val(data.title);
+        var formattedStartDate = data.startDate.split('T')[0];
+        var formattedEndDate = data.endDate.split('T')[0];
+
+        $('#start-date-input').val(formattedStartDate);
+        $('#end-date-input').val(formattedEndDate);
+        $('#end-date-input').attr("min", formattedStartDate);
+        engagements.initializeDateValidation();
+
+        $('#project-description').val(data.description);
+
+        $("#project-owners").dropdown('clear');
+        $("#team-members").dropdown('clear');
+
+        var selectedOwnerIDs = data.owners.map(o => o.userID);
+        var selectedMemberIDs = data.teamMembers.map(m => m.userID);
+
+        $('#project-owners').empty();
+        engagements.projectOwners.forEach(owner => {
+            var isSelected = selectedOwnerIDs.includes(owner.userID) ? 'selected' : '';
+            $('#project-owners').append(new Option(owner.username, owner.userID, false, isSelected));
+        });
+        $('#project-owners').dropdown('refresh');
+
+        $('#team-members').empty();
+        engagements.teamMembers.forEach(member => {
+            var isSelected = selectedMemberIDs.includes(member.userID) ? 'selected' : '';
+            $('#team-members').append(new Option(member.username, member.userID, false, isSelected));
+        });
+        $('#team-members').dropdown('refresh');
+
+        $('#team-table-body').empty();
+        data.teamMembers.forEach(member => {
+            var memberStartDate = member.startDate.split('T')[0];
+            var memberEndDate = member.endDate.split('T')[0];
+
+            $('#team-table-body').append(`
+                            <tr data-user-id="${member.userID}">
+                                <td>${member.teamMemberName}</td>
+                                <td><input type="date" name="start-date" value="${memberStartDate}" min="${formattedStartDate}" max="${formattedEndDate}" onchange="engagements.updateTeamMemberEndDateMin(${member.userID})" /></td>
+                                <td><input type="date" name="end-date" value="${memberEndDate}" min="${formattedStartDate}" max="${formattedEndDate}" /></td>
+                          </tr>
+            `);
+
+            var endDateInput = $(`#team-table-body tr[data-user-id="${member.userID}"] input[name="end-date"]`);
+            endDateInput.attr("min", memberStartDate);
+
+            // Clear the end date if it's invalid
+            if (memberEndDate < memberStartDate) {
+                endDateInput.val('');
+            }
+        });
+
+        $('#task-list').empty();
+
+        var selectedTaskIDs = new Set(data.tasks.map(task => task.taskID));
+
+        engagements.tasks.sort((a, b) => {
+            var aChecked = selectedTaskIDs.has(a.taskID) ? 1 : 0;
+            var bChecked = selectedTaskIDs.has(b.taskID) ? 1 : 0;
+            return bChecked - aChecked; 
+        });
+
+        engagements.tasks.forEach(task => {
+            var isChecked = selectedTaskIDs.has(task.taskID) ? 'checked' : '';
+            var isCreatedByMe = (task.createdBy === engagements.username || task.modifiedBy === engagements.username) ? 'created-by-me' : '';
+
+            // Remove existing task element to prevent duplication
+            $(`#task-list .task-item[data-task-id="${task.taskID}"]`).remove();
+
+            // Append the new task element
+            $('#task-list').append(`
+                <div class="task-item ${isCreatedByMe}" data-task-id="${task.taskID}">
+                    <div class="ui checkbox">
+                        <input type="checkbox" name="task" value="${task.taskID}" ${isChecked} onchange="engagements.updateCheckedTasks()">
+                        <label>${task.taskName} <i class="ui blue edit icon" onclick="event.stopPropagation(); engagements.taskEditModal(${task.taskID})"></i></label>
+                    </div>
+                </div>
+            `);
+        });
+
+
+        engagements.checkedTasks = new Set(selectedTaskIDs);
+        engagements.updateTaskCount();
+        $('#task-list .ui.checkbox').checkbox();
+
+    };
+
+    // Update the task count in the label
+    engagements.updateTaskCount = function() {
+        var selectedCount = $('#task-list input[type="checkbox"]:checked').length;
+        $('#taskCount').text(selectedCount);
+    };
+
+    engagements.initializeDateValidation = function () {
+        var startDate = $('#start-date-input').val();
+        if (startDate) {
+            $('#end-date-input').attr('min', startDate);
+            $('#end-date-input').prop("disabled", false);
+        } else {
+            $('#end-date-input').prop("disabled", true);
+        }
+    };
+
+    // Clear and reset form inputs
+    engagements.clearForm = function () {
+        engagements.checkedTasks.clear();
+        $('form').find('input, textarea').val('');
+        $('form').find('select').dropdown('clear');
+        $('#team-table-body').empty();
+        $('#task-list').empty();
+        $('#engagementModal').modal('hide');
+        engagements.objPost.EngagementID = 0;
+        $('.ui.form .field').removeClass('error');
+        $('.ui.basic.red.pointing.prompt.label').hide();
+        $('.ui.form').removeClass('error');
+        $('#taskCount').text(0);
+    };
+
+    // Adds a new engagement
+    engagements.addNew = function (preFillData = null) {
+        $("#end-date-input").prop("disabled", true);
+        engagements.initializeDateValidation();
+
+        // Open the modal
+        $('#engagementModal').modal({
+            allowMultiple: true
+        }).modal('show');
+
+        // If preFillData is provided, populate the form fields
+        if (preFillData) {
+            engagements.populateForm(preFillData);
+        } else {
+            $('#title').val('');
+            $('#start-date-input').val('');
+            $('#end-date-input').val('').attr("min", '');
+            $('#project-description').val('');
+
+            $('#team-table-body').empty();
+            $('#task-list').empty();
+
+            engagements.getUsers("projectOwners", "project-owners").then(() => {
+                $("#project-owners").dropdown('refresh');
+            });
+
+            engagements.getUsers("teamMembers", "team-members").then(() => {
+                $("#team-members").dropdown('refresh');
+            });
+
+            engagements.getTasks();
+        }
+    };
+
+
+    // Add a new task
+    engagements.addCustomTask = function () {
+        var taskName = $('#custom-task-name').val().trim();
+
+        if (!engagements.validateCustomTask()) {
+            return;
+        }
+
+        if (!taskName) {
+            helper.ErrorToast("Please enter a task name.");
+            return;
+        }
+
+        var task = {
+            TaskID: 0,
+            TaskName: taskName,
+            TaskDescription: '',
+            IsDeleted: false,
+            IsGeneric: true
+        };
+
+        var checkedTaskIds = $('#task-list input[type="checkbox"]:checked').map(function () {
+            return parseInt($(this).val());
+        }).get();
+
+        $.ajax({
+            url: `${window.location.origin}/api/Engagement/tasks`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(task),
+            success: function (response) {
+                helper.SuccessToast("SAVE_SUCCESS");
+                var newTaskID = response.taskID;
+                if(newTaskID) {
+                    engagements.getTasks().then(() => {
+                        $('#task-list').empty();
+                        engagements.tasks.forEach(task => {
+                            var isCustomTask = task.taskID === newTaskID;
+                            var isChecked = checkedTaskIds.includes(task.taskID) || isCustomTask ? 'checked' : '';
+                            var isCreatedByMe = task.createdBy === engagements.username ? 'created-by-me' : '' || task.modifiedBy === engagements.username ? 'created-by-me' : '';
+                            $('#task-list').append(`
+                                       <div class="task-item ${isCreatedByMe}" data-task-id="${task.taskID}">
+                                           <div class="ui checkbox" >
+                                                <input type="checkbox" name="task" value="${task.taskID}" ${isChecked} onchange="engagements.updateCheckedTasks()">
+                                                    <label>${task.taskName}<i class="ui blue edit icon" onclick="event.stopPropagation(); engagements.taskEditModal(${task.taskID})"></i></label>
+                                            </div>
+                                        </div>
+                            `);
+                        });
+
+                        $('#task-list .ui.checkbox').checkbox();
+                        $('#custom-task-name').val('');
+                        $('#custom-task-error').fadeOut();
+                        engagements.updateTaskCount();
+                    });
+                }
+            },
+            error: function (err) {
+                if (err.responseJSON.taskID == -1) {
+                    helper.ErrorToast("TASK_EXIST");
+                } else {
+                    helper.ErrorToast("SAVE_FAIL");
+                }
+            }
+        });
+    };
+
+    engagements.editTask = function (taskID) {
+        var taskElement = $(`[data-task-id="${taskID}"]`);
+        var taskLabelElement = taskElement.find('label');
+        var newTaskName = helper.stripHTML($('#taskName').val().trim());
+
+        if (!engagements.validateCustomTask()) {
+            return;
+        }
+
+        if (!newTaskName) {
+            helper.ErrorToast("Please enter a task name.");
+            return;
+        }
+
+        var task = {
+            TaskID: taskID,
+            TaskName: newTaskName,
+            TaskDescription: '',
+            IsDeleted: false,
+            IsGeneric: false
+        };
+        $.ajax({
+            url: `${window.location.origin}/api/Engagement/tasks`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(task),
+            success: function () {
+                engagements.tasks.find(item => item.taskID === task.TaskID).taskName = task.TaskName;
+                taskLabelElement.html(`
+                        ${task.TaskName}<i class="ui blue edit icon" onclick="event.stopPropagation(); engagements.taskEditModal(${taskID})"></i>
+                `);
+                helper.SuccessToast("UPDATE_SUCCESS");
+                
+            },
+            error: function () {
+                helper.ErrorToast("UPDATE_FAIL");
+            }
+        });
+    };
+
+    engagements.deleteTask = function (taskID) {
+        $.ajax({
+            url: `${window.location.origin}/api/Engagement/tasks/${taskID}`,
+            method: 'DELETE',
+            success: function (response) {
+                $(`[data-task-id="${taskID}"]`).remove();
+                helper.SuccessToast(response.message);
+                engagements.updateTaskCount();
+            },
+            error: function (err) {
+                helper.ErrorToast(err.responseJSON.message);
+            }
+        });
+    }
+
+
+    // Update the table of team members
+    engagements.updateTeamMembersTbl = function () {
+        var selectedMembers = $('#team-members').val();
+        var startDate = $('#start-date-input').val();
+        var endDate = $('#end-date-input').val();
+
+        engagements.objPost.TeamMembers = [];
+
+        selectedMembers.forEach(memberId => {
+            if ($('#team-table-body').find(`[data-user-id="${memberId}"]`).length === 0) {
+                var member = engagements.teamMembers.find(m => m.userID == memberId);
+
+                if (member) {
+                    $('#team-table-body').append(`
+                                    <tr data-user-id="${member.userID}">
+                                        <td>${member.username}</td>
+                                        <td><input type="date" name="start-date" value="${startDate}" min="${startDate}" max="${endDate}" onchange="engagements.updateTeamMemberEndDateMin(${member.userID})" /></td>
+                                        <td><input type="date" name="end-date" value="${endDate}"  min="${startDate}" max="${endDate}" /></td>
+                                    </tr>
+                    `);
+                }
+            }
+
+            engagements.objPost.TeamMembers.push({
+                UserID: parseInt(memberId),
+                StartDate: startDate,
+                EndDate: endDate
+            });
+        });
+
+        $('#team-table-body tr').each(function () {
+            var memberId = $(this).attr('data-user-id');
+            if (!selectedMembers.includes(memberId)) {
+                $(this).remove();
+            }
+        });
+    };
+
+    // Update the end date for each team member
+    engagements.updateTeamMemberEndDateMin = function (memberId) {
+        var startDateInput = $(`#team-table-body tr[data-user-id="${memberId}"] input[name="start-date"]`);
+        var endDateInput = $(`#team-table-body tr[data-user-id="${memberId}"] input[name="end-date"]`);
+        var startDate = startDateInput.val();
+
+        if (startDate) {
+            endDateInput.attr("min", startDate);
+
+            var currentEndDate = endDateInput.val();
+            if (currentEndDate && currentEndDate <= startDate) {
+                endDateInput.val('');
+            }
+
+            endDateInput.prop("disabled", false);
+        } else {
+            endDateInput.prop("disabled", true);
+            endDateInput.val('');
+        }
+    };
+
+    // Generic function to retrieve users for both project owners and team members
+    engagements.getUsers = function (type, elementId) {
+        var url = window.location.origin + "/api/User/GetAllUsers";
+        return $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (result) {
+                engagements.currentUserId = result.currentUserID;
+                var users = result.users;
+
+                let options;
+
+                if (type === "projectOwners") {
+                    engagements.projectOwners = Array.isArray(users) ? users : [];
+                    options = '<option value="" disabled selected>Select project owners</option>';
+                } else if (type === "teamMembers") {
+                    engagements.teamMembers = Array.isArray(users) ? users : [];
+                    options = '<option value="" disabled selected>Select team members</option>';
+                }
+
+                users.forEach(user => {
+                    if (user.userID !== engagements.currentUserId) {
+                        options += `<option value="${user.userID}">${user.username}</option>`;
+                    }
+                });
+
+                $(`#${elementId}`).html(options);
+                $(`#${elementId}`).dropdown();
+            },
+            error: function () {
+                console.error(`Error fetching ${type}`);
+            }
+        });
+    };
+
+    // Retrieve tasks
+    engagements.getTasks = function () {
+        var url = window.location.origin + "/api/Engagement/tasks";
+        return $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (result) {
+                engagements.username = result.userName;
+                engagements.tasks = result.tasks;
+                engagements.renderTaskList(engagements.tasks);
+            }
+        });
+    };
+
+    // Render tasks in the task list
+    engagements.renderTaskList = function (tasks) {
+        var str = '';
+        tasks.forEach(task => {
+            var isChecked = engagements.checkedTasks.has(task.taskID) ? 'checked' : '';
+            var isCreatedByMe = task.createdBy === engagements.username ? 'created-by-me' : '' || task.modifiedBy === engagements.username ? 'created-by-me' : '';
+            str += `
+                <div class="task-item ${isCreatedByMe}">
+                    <div class="ui checkbox">
+                        <input type="checkbox" name="task" value="${task.taskID}" ${isChecked} onchange="engagements.updateCheckedTasks()">
+                        <label>${task.taskName}<i class="ui blue edit icon" onclick="event.stopPropagation(); engagements.taskEditModal(${task.taskID})"></i></label>
+                    </div>
+                </div>`;
+        });
+        $("#task-list").html(str);
+        $('#task-list .ui.checkbox').checkbox();
+    };
+
+    //Function to open task edit modal
+    engagements.taskEditModal = function (id) {
+        var task = engagements.tasks.find(item => item.taskID === id);
+        $('#taskName').val(task.taskName);
+        $('#createdBy').text(task.createdBy);
+        $('#createdOn').text(helper.ToLocalDate2(task.createdOn));
+        $('#modifiedBy').text(task.modifiedBy);
+        $('#modifiedOn').text(helper.ToLocalDate2(task.modifiedOn));
+
+
+        $('#updateTaskBtn').off('click').on('click', function () {
+            engagements.editTask(id);
+            $('#openTaskEditModal').modal('hide');
+        });
+
+        $('#deleteTaskBtn').off('click').on('click', function () {
+            engagements.deleteTask(id);
+            $('#openTaskEditModal').modal('hide');
+        });
+
+        $('#openTaskEditModal').modal({
+            detachable: true,
+            allowMultiple: true,
+            closable: true
+        }).modal('show');
+    }
+
+    // Function to update the task on checkbox changes
+    engagements.updateCheckedTasks = function () {
+        $('#task-list input[type="checkbox"]').each(function () {
+            var taskId = parseInt($(this).val());
+            if ($(this).is(':checked')) {
+                engagements.checkedTasks.add(taskId);
+            } else {
+                engagements.checkedTasks.delete(taskId);
+            }
+            engagements.updateTaskCount();
+        });
+    };
+
+    // Filter tasks based on search input
+    engagements.filterTasks = function (searchBox) {
+        var query = $(searchBox).val().toLowerCase();
+        var filteredTasks = engagements.tasks.filter(task => task.taskName.toLowerCase().includes(query));
+
+        engagements.renderTaskList(filteredTasks);
+
+        // Ensure checked state is applied to tasks in checkedTasks
+        $('#task-list input[type="checkbox"]').each(function () {
+            var taskId = parseInt($(this).val());
+            $(this).prop('checked', engagements.checkedTasks.has(taskId));
+        });
+
+        engagements.updateTaskCount();
+    };
+
+    engagements.confirmDelete = function (engagementId) {
+        // Store EngagementId for use in confirmation
+        engagements.objPost.EngagementID = engagementId;
+
+        // Show the confirmation modal
+        $('#deleteConfirmationModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true
+        }).modal('show');
+    };
+
+    engagements.deleteEngagement = function () {
+        var engagementId = engagements.objPost.EngagementID;
+
+        $.ajax({
+            url: `${window.location.origin}/api/Engagement/DeleteEngagement/${engagementId}`,
+            method: 'DELETE',
+            success: function (response) {
+                $('#deleteConfirmationModal').modal('hide');
+                $('#deleteSuccessModal').modal({
+                    centered: true,
+                    detachable: false,
+                    closable: true
+                }).modal('show');
+            },
+            error: function (xhr) {
+                $('#deleteConfirmationModal').modal('hide');
+
+                var errorMessage = xhr.responseJSON?.message || 'An error occurred.';
+                var timesheets = errorMessage.split(',');
+
+                // Remove any existing error modal from the DOM
+                $('#errorModal').remove();
+
+                // Generate new error modal content
+                var modalContent = `
+                    <div id="errorModal" class="ui error message small modal" style="height:auto">
+                        <i class="close icon" style="color: red"></i>
+                        <h2 style="margin: auto;">Delete Operation Failed!</h2>
+                        <h4>This engagement cannot be deleted, as below timesheets are already submitted. Please contact System Administrator.</h4>
+                        <ul class="list" id="error-content">
+                            ${timesheets.map((item) => `<li>${item.trim()}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                $('body').append(modalContent);
+                $('#errorModal').modal({
+                    centered: true,
+                    detachable: false,
+                    closable: true,
+                    onHidden: function () {
+                        $('#errorModal').remove();
+                    }
+                }).modal('show');
+            }
+
+        });
+        engagements.objPost.EngagementID = 0;
+    };
+
+    // Disable keyboard input for all date inputs
+    $(document).on("keydown", "input[type='date']", function (event) {
+        event.preventDefault(); // Prevent keyboard interaction
+    });
+
+    $(document).ready(function () {
+        engagements.get();
+        $('.ui.accordion').accordion();
+    });
+</script>

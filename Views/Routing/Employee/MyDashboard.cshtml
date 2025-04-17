@@ -1,0 +1,233 @@
+﻿<link rel="stylesheet" type="text/css" href="~/css/Dashboard.css" />
+
+<div class="main-component">
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+        </div>
+        <div class="eight wide column right aligned">
+            <button class="ui green button large" id="viewOrgChart">Organizational Chart</button>
+        </div>
+    </div>
+</div>
+
+<div class="ui fullscreen modal px-0" id="orgModal">
+    <div class="header">Organizational Chart</div>
+    <div class="content" id="chartContent">
+        <div id="chart_div" style="height: calc(100vh - 150px); overflow-y: auto;"></div>
+    </div>
+    <div class="actions">
+        <div class="ui button" id="closeOrgModal">Close</div>
+    </div>
+</div>
+
+
+@* CARDS *@
+<div class="mt-5 header-container3">
+    <div class="ui two column stackable grid container">
+        <div class="column">
+            <div class="ui blue card" data-title="Approver for your timesheets" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Primary Approver</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui tiny statistic">
+                            <div class="ui center aligned large header" id="primaryApprover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="ui blue card" data-title="Secondary Approver for your timesheets" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Secondary Approver</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui tiny statistic">
+                            <div class="ui center aligned large header" id="secondaryApprover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="ui orange card" data-title="The week of your most recently submitted timesheet." data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Latest Timesheet</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author medium">
+                        <div class="ui tiny statistic">
+                            <div class="ui center aligned large header" id="latestTSdate">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="ui green card defaults-card" id="hoverablepointer" data-title="Number of pending timesheets for submission. (Click to view the list.)" data-position="bottom center">
+                <div class="content">
+                    <div class="ui center aligned huge header">Pending Timesheets</div>
+                    <hr />
+                </div>
+                <div class="extra-content">
+                    <div class="center aligned author">
+                        <div class="ui small statistic">
+                            <div class="value" id="defaultsCount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for showing the list of records -->
+        <div class="ui small modal px-0" id="defaultsModal">
+            <div class="header">Pending Timesheets</div>
+            <div class="defaultsContent">
+                <ul id="defaultsList" class="ui list"></ul>
+            </div>
+            <div class="actions">
+                <div class="ui button" id="closeModal">Close</div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    var empDashboard = {};
+
+        empDashboard.loadOrgChart = function () {
+            if (!window.google || !google.charts) {
+                // Load Google Charts only when the button is clicked
+                const script = document.createElement('script');
+                script.src = 'https://www.gstatic.com/charts/loader.js';
+                script.onload = function () {
+                    google.charts.load('current', { packages: ["orgchart"] });
+                    google.charts.setOnLoadCallback(empDashboard.loadOrgData);
+                };
+                document.head.appendChild(script);
+            }
+        };
+
+        empDashboard.loadOrgData = function () {
+            fetch('/api/SuperUser/GetOrgData')
+                .then(response => response.json())
+                .then(data => {
+                    const chartData = new google.visualization.DataTable();
+                    chartData.addColumn('string', 'Name');
+                    chartData.addColumn('string', 'Manager');
+                    chartData.addColumn('string', 'ToolTip');
+
+                    const orgChartData = data.map(employee => [
+                        { v: employee.employeeName, f: employee.employeeName },
+                        employee.managerName || '',
+                        ''
+                    ]);
+
+                    chartData.addRows(orgChartData);
+
+                    const chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
+                    chart.draw(chartData, { allowHtml: true });
+                })
+                .catch(error => {
+                    console.error('Error loading organizational chart data:', error);
+                    $('#chart_div').html('<p>Error loading chart. Please try again later.</p>');
+                });
+        };
+
+        empDashboard.empDashTSData = function () {
+        fetch('/api/Dashboard/getlatesttsanddefaults')
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                if (data.lastTSDate === 'No Submissions') {
+                    $('#latestTSdate').text("No Submissions");
+                }
+                else
+                {
+                    $('#latestTSdate').text(data.lastTSDate);
+                }
+            })
+    };
+
+    empDashboard.empDashApproverData = function() {
+        fetch('/api/Dashboard/getuserapproverinfo')
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                $('#primaryApprover').text(data.primaryManagerName);
+                $('#secondaryApprover').text(data.secondaryManagerName);
+            })
+    }
+
+    empDashboard.empDashDefaultsData = function () {
+    fetch('/api/Dashboard/getemployeedefaults')
+        .then(response => response.json())
+        .then(data => {
+            // Update defaults count
+            $('#defaultsCount').text(data.length);
+
+            // Prepare the list of records
+            let defaultsList = data.map(record => `<li>${record.timesheetDuration}</li>`).join('');
+            $('#defaultsList').html(defaultsList);
+        })
+        .catch(error => {
+            console.error('Error fetching defaults data:', error);
+            $('#defaultsCount').text('Error');
+            $('#defaultsList').html('<li>Error loading records.</li>');
+        });
+
+        // Click event for defaults card to open the modal
+        $('.defaults-card').on('click', function () {
+
+            $('#defaultsModal').modal({
+                centered: true,
+                detachable: false,
+                closable: true
+            }).modal('show');
+        });
+
+        // Close modal action
+        $('#closeModal').on('click', function () {
+            $('#defaultsModal').modal('hide');
+        });
+
+        $('#viewOrgChart').on('click', function () {
+                empDashboard.loadOrgChart();
+                    $('#orgModal').modal({
+                    centered: true,
+                    detachable: false,
+                    closable: true,
+                }).modal('show');
+        });
+
+        $('#closeOrgModal').on('click', function() {
+            $('#orgModal').modal('hide');
+        });
+};
+
+$(document).ready(function () {
+    $('.ui.card').popup();
+    empDashboard.empDashTSData();
+    empDashboard.empDashApproverData();
+    empDashboard.empDashDefaultsData();
+
+    
+});
+
+</script>

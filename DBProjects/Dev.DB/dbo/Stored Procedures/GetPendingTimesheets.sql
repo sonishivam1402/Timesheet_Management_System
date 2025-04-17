@@ -1,0 +1,30 @@
+﻿
+CREATE PROCEDURE [dbo].[GetPendingTimesheets]
+AS
+BEGIN
+
+
+
+select T.TimesheetID,T.UserID,usrSubmitteBy.DisplayName [UserName], T.StartDate,T.EndDate,
+T.Status,W.SubmittedOn ,DATEDIFF(DAY, W.SubmittedOn, GetUTCDate()) DaysDue,0 as ManagerId,
+cast('' as varchar(100)) as ManagerName,  cast('' AS VARCHAR(100)) AS ManagerEmail, FORMAT(T.StartDate, 'dd-MM-yyyy') + ' to ' + FORMAT(T.EndDate, 'dd-MM-yyyy') AS tsDuration
+		
+into #TempData
+
+from TimesheetHdr T,  [dbo].[TimesheetWorkflow] W,Users usrSubmitteBy
+where T.Status=2
+and T.TimesheetId=W.TimesheetId
+and usrSubmitteBy.UserID=T.UserID
+
+
+----Getting Manager for the users ---
+
+Update T Set ManagerId=UM.ManagerID,ManagerName=usrManger.DisplayName, ManagerEmail = usrManger.Email
+From #TempData T,dbo.UserManagerMapping UM,Users usrManger
+where T.UserID=UM.UserId and UM.ManagerId=usrManger.UserId
+and UM.isPrimary=1 
+
+Select * from #TempData order by DaysDue desc
+
+drop table #TempData
+END

@@ -1,0 +1,202 @@
+﻿@{
+    var version = "2.0";
+}
+@using UCITMS
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Fomantic UI -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.css">
+    <link rel="stylesheet" href="~/css/Notification.css" />
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.8.8/dist/semantic.min.js"></script>
+    <script src="~/js/notification.js"></script>
+
+    <style>
+        .container {
+            max-width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ui[class*="top attached"].menu {
+            margin-top: 0;
+            height: 60px;
+            position: fixed;
+            z-index: 1000;
+        }
+
+        body {
+            margin-top: 60px;
+        }
+
+        .text {
+            font-size: xx-large;
+        }
+
+        #logo {
+            transition: 250ms ease-in-out;
+            margin-left: 10px;
+        }
+
+            #logo:hover {
+                background: none;
+                transform: scale(1.2);
+            }
+
+
+        .ui.menu:not(.vertical) .right.item, .ui.menu:not(.vertical) .right.menu {
+            margin-left: 0px !important;
+        }
+
+        .ui.menu .right.item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #userPopupContent {
+            padding: 5px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            z-index: 1;
+        }
+
+        .item.ui.image {
+            background: none !important;
+        }
+
+        .center.item,
+        .center.item p,
+        #nav-heading {
+            pointer-events: none !important;
+        }
+
+            .center.item:hover,
+            .center.item p:hover,
+            #nav-heading:hover,
+            .center.item:active,
+            .center.item p:active,
+            #nav-heading:active {
+                color: inherit !important;
+                text-decoration: none !important;
+                background-color: transparent !important;
+                box-shadow: none !important;
+            }
+
+    </style>
+</head>
+
+<body>
+    <!-- Full width navigation menu -->
+    <div class="ui top attached menu borderless">       
+
+        <a class="item" href="~/" id="logo">
+            <img class="item ui image" src="~/image/uci_logo.png" width="60px">
+        </a>
+
+        <div class="center item basic">
+            <p class="ui text basic"><b id="nav-heading">Time Management System</b></p>
+        </div>
+
+        <div class="ui icon" id="notificationButton" aria-label="Notifications" style="margin-top: 21px; ">
+            <i class="bell icon" style="font-size: 1.5em; "></i>
+            <span class="notification-count" id="notificationCount"></span>
+        </div>
+
+        <div class="ui custom popup top transition hidden" id="notificationPopup">
+            <div class="ui header" id="notificationHeader">Notifications</div>
+            <div class="ui divider"></div>
+            <div class="content" id="notification-Popup">
+                <div class="ui relaxed divided list" id="notificationList">
+                    <!-- Notification items will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="ui simple right item" id="userPopupTrigger">
+            <!-- User icon that will trigger the popup -->
+            <i class="user icon"></i>
+            <span id="userDisplayName"></span>
+        </div>
+
+        <!-- Hidden content for the popup -->
+        <div id="userPopupContent" style="display:none;">
+            <div>
+                <b>
+                    <span id="popupUserName"></span>
+                </b>
+            </div>
+            <div>
+                <b>
+                    <span id="popupUserEmail"></span>
+                </b>
+            </div>
+        </div>
+
+        <script>
+            const navbar = {};
+
+            // Function to handle the redirection
+            navbar.handleRedirection = function () {
+                const redirect = navbar.getQueryParam('redirect');
+                if (redirect === "PendingApprovals") {
+                    window.location.href = '/PendingApprovals';
+                }
+            }
+
+            // Function to get the query
+            navbar.getQueryParam = function (param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+
+            navbar.checkHeartbeat = function () {
+                fetch('/Routing/hb')
+                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            window.location.href = '/';
+                        }
+                    });
+            };
+
+            navbar.setInterval = function () {
+                setInterval(navbar.checkHeartbeat, 30000);
+            };
+
+            navbar.loadUserInfo = function () {
+                fetch('api/User/GetCurrentUserInfo')
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#userDisplayName').text(data.username);
+                        $('#popupUserName').text(data.username);
+                        $('#popupUserEmail').text(data.email);
+                        $('#nav-heading').text(data.envVar);
+                    });
+            }
+
+            $(document).ready(function () {
+                // Fomantic UI Popup Initialization
+                $('#userPopupTrigger').popup({
+                    popup: $('#userPopupContent'),
+                    on: 'hover', // Trigger popup on hover
+                    position: 'bottom center',
+                    lastResort: 'bottom center',
+                    hoverable: true, // Keeps the popup open when hovered over
+                });
+
+                navbar.loadUserInfo();
+                navbar.setInterval();
+                navbar.handleRedirection();
+                notification.resetNotificationCount();
+            });
+        </script>
+    </div>
+</body>
+</html>

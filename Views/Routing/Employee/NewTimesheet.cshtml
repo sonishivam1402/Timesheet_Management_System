@@ -1,0 +1,1310 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>New Timesheet</title>
+
+    <style>
+        .timesheet-table th:nth-child(2),
+        .timesheet-table td:nth-child(2) {
+            width: 5%;
+        }
+
+        .timesheet-table th:nth-child(3),
+        .timesheet-table td:nth-child(3) {
+            width: 30%;
+        }
+
+        .timesheet-table th:nth-child(4),
+        .timesheet-table td:nth-child(4) {
+            width: 25%;
+        }
+
+        .timesheet-table th:nth-child(5),
+        .timesheet-table td:nth-child(5) {
+            width: 20%;
+        }
+
+        .timesheet-table th:nth-child(6),
+        .timesheet-table td:nth-child(6),
+        .timesheet-table td.totalHours {
+            width: 2%;
+        }
+
+        .timesheet-table th:nth-child(7),
+        .timesheet-table td:nth-child(7),
+        .timesheet-table td.totalMinutes {
+            width: 2%;
+        }
+
+        .timesheet-table th:nth-child(8),
+        .timesheet-table td:nth-child(8) {
+            width: 25%;
+        }
+
+        .timesheet-table input {
+            height: 37px;
+            font-size: 14px;
+            border: .5px solid white;
+            border-radius: 3%;
+            outline: none;
+            padding-left: 15px;
+            width: 100%;
+            /* background-color: transparent; */
+        }
+
+        .ui.dropdown {
+            font-size: 14px;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+            .ui.dropdown .text {
+                font-size: 14px;
+            }
+
+            .ui.dropdown.default.text {
+                color: black;
+            }
+
+            .ui.dropdown .menu .item {
+                font-size: 14px;
+            }
+
+        .action i.icon {
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        .editing {
+            background-color: rgba(0, 0, 0, .15) 
+        }
+
+        .timesheet-section {
+            margin-bottom: 20px;
+        }
+
+        .content-wrapper[b-culfelg8t4] {
+            gap: 0;
+        }
+
+        .ui.segment {
+            margin: 0;
+            margin-bottom: 15px;
+        }
+
+        .ui.dropdown:not(.button) > .default.text {
+            color: black;
+        }
+
+        .ui.small.modal {
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            height: fit-content !important;
+            max-height: 80vh; 
+        }
+
+        .ui.small.modal .content {
+            padding: 20px; 
+        }
+
+        #timesheetDropdown .menu .item {
+            font-size: 16px; 
+        }
+
+        #timesheetDropdown .text {
+            font-size: 20px; 
+            font-weight: bold;
+            color: black; 
+        }
+
+        .timesheet-table tfoot tr td {
+            border-top: 2px solid black;
+            border-bottom: 2px solid black;
+            text-align: left;
+            padding-left: 15px;
+        }
+
+            .timesheet-table tfoot tr td:first-child {
+                border-left: 2px solid black; /* Ensures a left border on the first cell of the summary row */
+                border-bottom-left-radius: 4px; /* Adds rounded corners to the bottom left, if needed */
+            }
+
+            .timesheet-table tfoot tr td:last-child {
+                border-right: 2px solid black;
+                border-left: 2px solid black;
+                border-bottom-right-radius: 4px; /* Adds rounded corners to the bottom right, if needed */
+            }
+
+        tr.editing-line td.error input {
+            border: 2px solid #FF777A; 
+            background: white;
+        }
+
+            tr.editing-line td.error input::placeholder {
+                color: #FF777A;
+            }
+
+        #line_id {
+            display: none !important;
+        }
+       
+        .ui.nag {
+            display: flex;
+            background-color: #F48D49 !important;
+            padding: 6px;
+            justify-content: center;
+            align-items: center;
+            color: white !important;
+            margin: 0;
+            width: 100%;
+            font-size:1.5rem;
+            position: relative;
+        }
+
+            .ui.nag .close.icon {
+            color:white !important;
+            opacity: 1;
+        }
+
+       
+    </style>
+</head>
+<body>
+    <div class="ui warning message accordion timesheet-rules">
+        <div class="title">
+            <i class="dropdown icon"></i>
+            <strong>Rules & Guidelines</strong>
+        </div>
+        <div class="content">
+            <div class="ui bulleted list">
+                <div class="item">Daily minimum working hours requirement: 8 hours</div>
+                <div class="item">Maximum allowed hours per day: 12 hours</div>
+                <div class="item">Weekend entries are optional, Kindly consult your Manager first.</div>
+                <div class="item">Adding Comments is highly Recommended.</div>
+            </div>
+        </div>
+    </div>
+    <div class="ui segment">
+        <div class="ui grid timesheet-header">
+            <div class="eight wide column">
+                <!-- Combined Timesheet Dropdown and Header -->
+                <div class="ui selection dropdown" id="timesheetDropdown">
+                    <input type="hidden" name="timesheet">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select Timesheet</div>
+                    <div class="menu" id="timesheetDropdownMenu"></div>
+                </div>
+            </div>
+       
+            <div class="eight wide column right aligned">
+                <h2 class="ui header">
+                    <span class="totalTime">
+                        Total:
+                        <span id="weeklyTotalHours">0</span> Hours :
+                        <span id="weeklyTotalMinutes">0</span> Minutes
+                    </span>
+                </h2>
+            </div>
+        </div>
+
+
+        @* Tables *@
+        <div id="timesheets">
+            <div class="timesheet-section ui segment">
+                <h3 class="ui header mb-4" id="monday-header">
+                    Monday <span id="monday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+
+                <table class="ui celled table timesheet-table" id="monday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section  ui segment">
+                <h3 class="ui header mb-4" id="tuesday-header">
+                    Tuesday <span id="tuesday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="tuesday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section  ui segment">
+                <h3 class="ui header mb-4" id="wednesday-header">
+                    Wednesday <span id="wednesday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="wednesday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section  ui segment">
+                <h3 class="ui header mb-4" id="thursday-header">
+                    Thursday <span id="thursday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="thursday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section  ui segment">
+                <h3 class="ui header mb-4" id="friday-header">
+                    Friday <span id="friday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="friday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section ui success floating message">
+                <h3 class="ui header mb-4" id="optional-header">
+                    Optional
+                </h3>
+                <div class="ui checkbox">
+                    <input type="checkbox" name="saturday">
+                    <label>Weekend</label>
+                </div>
+            </div>
+
+            <div class="timesheet-section  ui success message">
+                <h3 class="ui header mb-4" id="saturday-header">
+                    Saturday <span id="saturday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="saturday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="timesheet-section  ui success message">
+                <h3 class="ui header mb-4" id="sunday-header">
+                    Sunday <span id="sunday-date"></span>
+                    <button class="ui right floated green button addRowButton"><i class="ui icon add"></i>New Entry</button>
+                </h3>
+                <table class="ui celled table timesheet-table" id="sunday-table">
+                    <thead>
+                        <tr>
+                            <th id="line_id" hidden>LineID</th>
+                            <th>#</th>
+                            <th>Engagement</th>
+                            <th>Task</th>
+                            <th>Comments</th>
+                            <th>Hours</th>
+                            <th>Minutes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr class="ui blue">
+                            <td colspan="4" style="border-left: 1px solid black; color: black"><strong>Total</strong></td>
+                            <td class="totalHours" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td class="totalMinutes" style="font-weight: bold; padding-left: 25px;  color: black">0</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <button class="ui button blue" onclick="$('.ui.submit.modal').modal('show')"><i class="ui icon share"></i>Submit for Approval</button>
+
+        </div>
+    </div>
+
+    <div class="ui small modal submit">
+        <div class="header">
+            Submit Confirmation
+        </div>
+        <div class="content">
+            <p><b>Are you sure you want to submit?</b></p>
+            <div class="ui form">
+                <div class="field">
+                    <label>Comments</label>
+                    <textarea id="comments" placeholder="Enter your comments here..." oninput="timesheet.validateComments()"></textarea>
+                    <div id="comments-error" class="ui basic red pointing prompt label transition" style="display: none;">
+                        Comments cannot contain angle brackets (&lt; or &gt;).
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <button class="ui red cancel button">Cancel</button>
+            <button class="ui green button" onclick="timesheet.submit()">Submit</button>
+        </div>
+    </div>
+
+    <div class="ui segment" id="noTimesheetMessage" style="display: none; width: 800px; margin: 0 auto;">
+        <div class="ui icon message">
+            <i class="info circle icon"></i>
+            <div class="content">
+                <div class="header">No Pending Timesheets</div>
+                <p>You don’t have any timesheets pending for approval or available for editing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Summary Modal -->
+    <div class="ui small modal" id="errorSummaryModal">
+        <div class="header" id="errorSummaryHeader">Time sheet Submission Not Successful!</div>
+        <div class="content">
+            <p id="errorSummary"></p>
+        </div>
+        <div class="actions">
+            <button class="ui red deny button" onclick="$('#errorSummaryModal').modal('hide');location.reload();">Cancel</button>
+        </div>
+    </div>
+
+    @* Success modal *@
+    <div class="ui small modal success">
+        <div class="header">
+            Timesheet Submission
+        </div>
+        <div class="content">
+            <p>Timesheet submitted successfully.</p>
+        </div>
+        <div class="actions">
+            <button class="ui green ok button" onclick="location.reload();">OK</button>
+        </div>
+    </div>
+
+
+
+    <script>
+
+        var timesheet = {};
+        timesheet.data = {};
+        timesheet.objPost = {
+            "TimesheetID": 0,
+            "HoursTotal": 0,
+            "MinutesTotal": 0,
+            "SubmissionComment": ""
+        }
+        timesheet.timesheetDates = {};
+
+        // Function to bind the post object for timesheet
+        timesheet.BindPostObject = function () {
+            timesheet.updateWeeklyTotal();
+            timesheet.objPost.TimesheetID = timesheet.data.timesheetID;
+            timesheet.objPost.HoursTotal = $("#weeklyTotalHours").text();
+            timesheet.objPost.MinutesTotal = $("#weeklyTotalMinutes").text();
+            timesheet.objPost.SubmissionComment = $('.ui.submit.modal textarea').val();
+        }
+
+        timesheet.timesheetLines = {};
+        timesheet.timesheetLines.objPost = {
+            "LineID": null,
+            "TimesheetID": 0,
+            "EngagementID": 0,
+            "TaskID": 0,
+            "Date": "",
+            "Hours": 0,
+            "Minutes": 0,
+            "Comment": "",
+            "TotalDayHours": 0,
+            "TotalDayMinutes":0
+        };
+
+        // Function to get the timesheet header data
+        timesheet.getTimesheetHdr = function () {
+            $.ajax({
+                url: `api/timesheet`,
+                type: 'GET',
+                success: function (response) {
+                    if (response.data) {
+                        timesheet.data = response;
+                        timesheet.getDates(timesheet.data.data.startDate);
+                        timesheet.timesheetLines.data = timesheet.data.timesheetLines;
+                        timesheet.populateTimesheetLines(timesheet.data.timesheetLines);
+                    }
+                }
+            });
+        }
+
+        // Function to bind the post object for timesheet lines
+        timesheet.timesheetLines.BindPostObject = function (row) {
+            var tableId = $(row).closest('table').attr('id');
+            timesheet.updateTotals();
+            timesheet.updateWeeklyTotal();
+            const displayedDate = $('#' + tableId.replace('-table', '-date')).text().split('(')[1].split(')')[0];
+            const formattedDateDB = moment(displayedDate, 'DD-MMM-YYYY').format('YYYY-MM-DD');
+
+            timesheet.timesheetLines.objPost = {
+
+                LineID: $(row).find('input[type="number"]:eq(0)').val() || null,
+                TimesheetID: timesheet.data.timesheetID,
+                EngagementID: $(row).find('.engagement-dropdown input').val(),
+                TaskID: $(row).find('.task-dropdown input').val(),
+                Date: formattedDateDB,
+                Hours: $(row).find('.hours-dropdown input').val() || 0,
+                Minutes: $(row).find('.minutes-dropdown input').val() || 0,
+                Comment: $(row).find('input[type="text"]').val(),
+                TotalDayHours: $('#' + tableId).find('.totalHours').text(),
+                TotalDayMinutes: $('#' + tableId).find('.totalMinutes').text(),
+            };
+
+            return timesheet.timesheetLines.objPost;
+        };
+
+        // Function to cal week number
+        timesheet.getMonthWeekNumber = function (date) {
+            const dateMoment = moment(date);
+            const startOfMonth = dateMoment.clone().startOf('month');
+
+            const firstMonday = startOfMonth.day() === 1 ? startOfMonth : startOfMonth.add(1, 'weeks').startOf('isoWeek');
+            return Math.ceil(dateMoment.diff(firstMonday, 'days') / 7) + 1;
+        };
+
+        // Function to get the timesheet dropdown
+        timesheet.getTimesheetsDropdown = function () {
+            $.ajax({
+                url: '/api/timesheet/ddr',
+                type: 'GET',
+                success: function (response) {
+                    $('#timesheetDropdownMenu').empty();
+
+                    // Check if there are any timesheets
+                    if (response.length === 0) {
+                        // Hide timesheet sections and show the "No Pending Timesheets" message
+                        $('#timesheets').hide();
+                        $('#noTimesheetMessage').show();
+
+                        // Reset the dropdown and total hours/minutes to default
+                        $('#timesheetDropdown').dropdown('clear');
+                        $('#weeklyTotalHours').text('0');
+                        $('#weeklyTotalMinutes').text('0');
+
+                        return;
+                    } else {
+                        // Show timesheet sections and hide the "No Pending Timesheets" message
+                        $('#timesheets').show();
+                        $('#noTimesheetMessage').hide();
+                    }
+
+                    const sortedTimesheets = response.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+                    let rejectedTimesheetsCount = 0;
+                    sortedTimesheets.forEach(ts => {
+                        if (ts.status == '4') {
+                            rejectedTimesheetsCount++;
+                        }
+                    });
+                    
+                    if (rejectedTimesheetsCount > 0) {
+                        $('.main-content').prepend(`
+                        <div class="ui nags">
+                            <div class="ui nag">
+                                <div class="title">You have <span class="ui white circular label" style="color: #F2711C; font-size: 16px;">${rejectedTimesheetsCount}</span> rejected timesheet${rejectedTimesheetsCount > 1 ? 's' : ''}. Please resubmit at the earliest.</div>
+                                <i class="close icon"></i>
+                            </div>
+                        </div>
+                    `);
+
+                      
+                        $('.ui.nag .close.icon').on('click', function () {
+                            $(this).closest('.ui.nags').remove();
+                        });
+                    }
+
+
+                    sortedTimesheets.forEach(ts => {
+                            $('#timesheetDropdownMenu').append(`
+                                <div class="item" data-value="${ts.timesheetID}">
+                                    ${ts.displayTitle} <div class="ui ${ts.status == '1' ? 'teal' : 'orange'} label">${ts.status == '1' ? "Draft" : "Draft (Rejected)"}</div>
+                                </div>
+                            `);
+
+                            timesheet.timesheetDates[ts.timesheetID] = { startDate: ts.startDate, endDate: ts.endDate };
+                    });
+
+                    const latestTimesheetID = sortedTimesheets[0].timesheetID;
+                    $('#timesheetDropdown').dropdown('set selected', latestTimesheetID);
+                    timesheet.handleTimesheetChange(latestTimesheetID);
+
+                    $('#timesheetDropdown').dropdown({
+                        onChange: function (value) {
+                            timesheet.handleTimesheetChange(value);
+                        }
+                    });
+                },
+                error: function () {
+                    helper.ErrorToast("LOAD_FAIL");
+                }
+            });
+        };
+
+        // Function to handle the timesheet change
+        timesheet.handleTimesheetChange = function (value) {
+            const selectedTimesheet = timesheet.timesheetDates[value];
+
+            if (selectedTimesheet) {
+                const dropdownText = selectedTimesheet.displayTitle;
+                $('#timesheetDropdown .text').text(dropdownText);
+
+                timesheet.getDates(selectedTimesheet.startDate);
+            }
+
+            $.ajax({
+                url: `/api/timesheet/${value}`,
+                type: 'GET',
+                success: function (response) {
+                    timesheet.data = response;
+                    timesheet.data.timesheetID = value;
+                    timesheet.populateTimesheetLines(timesheet.data);
+                }
+            });
+        };
+
+        timesheet.validateComments = function() {
+            const commentsField = document.getElementById('comments');
+            const commentsError = document.getElementById('comments-error');
+            const commentsValue = commentsField.value.trim();
+
+            if (commentsValue.includes('<') || commentsValue.includes('>')) {
+                commentsError.style.display = 'block';
+                commentsField.classList.add('error');
+                return false;
+            } else {
+                commentsError.style.display = 'none';
+                commentsField.classList.remove('error');
+                return true;
+            }
+        }
+
+        
+        // Function to get the dates with the day
+        timesheet.getDates = function (startDate) {
+            const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+            dayNames.forEach((day, i) => {
+                const currentDay = moment(startDate).add(i, 'days');
+                const formattedDate = currentDay.format('DD-MMM-YYYY');
+
+                $(`#${day}-date`).text(` (${formattedDate})`);
+            });
+        };
+
+        // API to get an engagement by engagement id
+        timesheet.getEngagementById = function (engagementID, callback) {
+            $.ajax({
+                url: `/api/Engagement/${engagementID}`,
+                type: 'GET',
+                success: function (response) {
+                    callback(response);
+                },
+                error: function (xhr, status, error) {
+                    helper.ErrorToast("LOAD_FAIL", error);
+                }
+            });
+        }
+
+        // Function to populate the timesheet lines
+        timesheet.populateTimesheetLines = function (timesheetLines) {
+
+            $('.timesheet-table tbody').empty();
+
+            const groupedByDay = _.groupBy(timesheetLines, entry =>
+                new Date(entry.date).toLocaleString('en-US', { weekday: 'long' }).toLowerCase()
+            );
+
+            _.each(groupedByDay, function (entries, dayName) {
+                let serialNo = 0;
+
+                _.each(entries, function (entry) {
+                    serialNo += 1;
+
+                    const tableId = `${dayName}-table`;
+
+                    const hoursOptions = _.map(_.range(0,13 ), h => `<div class="item" data-value="${h}">${h}</div>`).join('');
+
+                    const minutesOptions = _.map(_.range(0, 60, 5), m => `<div class="item" data-value="${m}">${m}</div>`).join('');
+
+                    const newRow = `
+                                        <tr>
+                                            <td hidden id="line_id"><input type="number" name="lineID" value="${entry.lineID}"></td>
+                                            <td>${serialNo}</td>
+                                            <td>
+                                                <div class="ui fluid selection dropdown engagement-dropdown">
+                                                    <input type="hidden" name="engagement" value="${entry.engagementID}">
+                                                    <i class="dropdown icon"></i>
+                                                    <div class="default text">${entry.engagementName}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="ui fluid selection dropdown task-dropdown">
+                                                    <input type="hidden" name="task" value="${entry.taskID}">
+                                                    <i class="dropdown icon"></i>
+                                                    <div class="default text">${entry.taskName}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="comments" value="${entry.comment || ''}" placeholder="Add comment" oninput="timesheet.validateLineComment(this)">
+                                            </td>
+                                            <td>
+                                                <div class="ui fluid selection dropdown hours-dropdown">
+                                                    <input type="hidden" name="hours" value="${entry.hours}">
+                                                    <i class="dropdown icon"></i>
+                                                    <div class="default text">${entry.hours || 0}</div>
+                                                    <div class="menu">
+                                                        ${hoursOptions}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="ui fluid selection dropdown minutes-dropdown">
+                                                    <input type="hidden" name="minutes" value="${entry.minutes}">
+                                                    <i class="dropdown icon"></i>
+                                                    <div class="default text">${entry.minutes || 0}</div>
+                                                    <div class="menu">
+                                                        ${minutesOptions}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="action">
+                                                <i class="blue edit icon" onclick="timesheet.timesheetLines.edit(this)"></i>
+                                                <i class="red trash icon" onclick="timesheet.timesheetLines.delete(this)"></i>
+                                            </td>
+                                        </tr>`;
+
+
+                    $('#' + tableId + ' tbody').append(newRow);
+                    const row = $('#' + tableId + ' tbody tr:last-child');
+
+                    //row.find('.ui.dropdown').dropdown();
+                    row.find('input').prop('disabled', true);
+                    timesheet.updateTotals();
+                    timesheet.updateWeeklyTotal();
+                });
+            });
+        };
+        
+        // API to save the timesheet lines
+        timesheet.timesheetLines.save = function (icon) {
+
+            var row = $(icon).closest('tr');
+            let lineObj = timesheet.timesheetLines.BindPostObject(row);
+
+            const engagementID = row.find('input[name="engagement"]').val();
+            const taskID = row.find('input[name="task"]').val();
+            const hours = row.find('input[name="hours"]').val();
+            const minutes = row.find('input[name="minutes"]').val();
+
+            if (!engagementID) {
+                helper.ErrorToast("Please select an engagement.");
+                return;
+            }
+            if (!taskID) {
+                helper.ErrorToast("Please select a task.");
+                return;
+            }
+            if (!hours) {
+                helper.ErrorToast("Please enter valid hours or minutes.");
+                return;
+            }
+
+            if (!minutes) {
+                helper.ErrorToast("Please enter valid hours or minutes.");
+                return;
+            }
+
+            var commentField = row.find('input[name="comments"]');
+            if (!timesheet.validateLineComment(commentField)) {
+                helper.ErrorToast("ANGLE_FAIL");
+                return;
+            }
+
+            $.ajax({
+                url: '/api/timesheet/save',
+                type: 'POST',
+                data: JSON.stringify(timesheet.timesheetLines.objPost),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    helper.SuccessToast("ROW_SAVED");
+                    timesheet.updateTotals();
+                    timesheet.updateWeeklyTotal();
+                    row.find('input[type="number"]:eq(0)').val(result.lineID);
+                    
+                    row.removeClass('editing');
+                    row.find('input').prop('disabled', true);
+                    row.find('.ui.dropdown').dropdown('destroy');
+                    $(icon).removeClass('green check').addClass('blue edit').attr('onclick', 'timesheet.timesheetLines.edit(this)');
+                    $(icon).siblings('.cancel').removeClass('cancel').addClass('trash').attr('onclick', 'timesheet.timesheetLines.delete(this)');
+                    row.find('input[name="comments"]').attr('placeholder', '');
+                },
+                error: function (err) {
+                    helper.ErrorToast(err.responseJSON.error);
+                }
+            });
+        }
+
+        // Function to fetch engagements for the user by date
+        timesheet.timesheetLines.fetchEngagements = function (dateForSection, callback) {
+            $.ajax({
+                url: `api/Engagement/GetEngagementsByUserAndDate/${dateForSection}`,
+                type: 'GET',
+                success: function (response) {
+                    callback(response);
+                },
+                error: function () {
+                    helper.ErrorToast('LOAD_FAIL');
+                }
+            });
+        }
+
+        // Function to add the timesheet line
+        timesheet.timesheetLines.add = function () {
+            $('.addRowButton').on('click', function () {
+                const table = $(this).closest('.timesheet-section').find('.timesheet-table');
+                let tableId = table.attr('id');
+                
+                    var dateForSection = $('#' + tableId.replace('-table', '-date')).text().split('(')[1].split(')')[0];
+
+                    timesheet.timesheetLines.fetchEngagements(dateForSection, function (engagements) {
+                        var rowCount = $('#' + tableId + ' tbody tr').length + 1;
+
+                        var engagementOptions = _.map(engagements, function (engagement) {
+                            return `<div class="item" data-value="${engagement.engagementID}">${engagement.title}</div>`;
+                        }).join('');
+
+
+                        const hoursOptions = _.map(_.range(0, 13), h => `<div class="item" data-value="${h}">${h}</div>`).join('');
+
+                        const minutesOptions = _.map(_.range(0, 60, 5), m => `<div class="item" data-value="${m}">${m}</div>`).join('');
+                        var newRow = `
+                        
+                                            <tr class="editing">
+                                                            <td hidden><input type="number" name="lineID" value="null"></td>
+                                                            <td>${rowCount}</td>
+                                                            <td>
+                                                                <div class="ui fluid search selection dropdown engagement-dropdown">
+                                                                    <input type="hidden" name="engagement">
+                                                                    <i class="dropdown icon"></i>
+                                                                    <div class="default text">Select Engagement</div>
+                                                                    <div class="menu">
+                                                                        ${engagementOptions}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="ui fluid search selection dropdown task-dropdown">
+                                                                    <input type="hidden" name="task">
+                                                                    <i class="dropdown icon"></i>
+                                                                    <div class="default text">Select Task</div>
+                                                                    <div class="menu"></div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="comments" value="" placeholder="Add comment" oninput="timesheet.validateLineComment(this)">
+                                                            </td>
+                                                            <td>
+                                                                <div class="ui fluid search selection dropdown hours-dropdown">
+                                                                    <input type="hidden" name="hours">
+                                                                    <i class="dropdown icon"></i>
+                                                                    <div class="default text">${engagements.hours || "HH"}</div>
+                                                                    <div class="menu">
+                                                                        ${hoursOptions}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="ui fluid search selection dropdown minutes-dropdown">
+                                                                    <input type="hidden" name="minutes">
+                                                                    <i class="dropdown icon"></i>
+                                                                    <div class="default text">${engagements.minutes || "MM"}</div>
+                                                                    <div class="menu">
+                                                                        ${minutesOptions}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td class="action">
+                                                               <i class="green check icon" onclick="timesheet.timesheetLines.debouncedSave(this)"></i>
+                                                               <i class="red cancel icon" onclick="timesheet.timesheetLines.cancel(this)"></i>
+                                                            </td>
+                                                        </tr>`;
+
+                        $('#' + tableId + ' tbody').append(newRow);
+                        const newRowElement = $('#' + tableId + ' tbody tr:last-child');
+                        newRowElement.find('.ui.dropdown').dropdown();
+
+                        timesheet.updateTotals();
+                        timesheet.updateWeeklyTotal();
+
+                        newRowElement.find('.engagement-dropdown').dropdown({
+                            onChange: function (value, text, $selectedItem) {
+                                timesheet.getEngagementById(value, function (response) {
+                                    let taskOptions = '';
+                                    if (Array.isArray(response)) {
+
+                                        taskOptions = response.map(task =>
+                                            `<div class="item" data-value="${task.taskID}">${task.taskName}</div>`
+                                        ).join('');
+                                    } else if (response && response.taskID) {
+
+                                        taskOptions = `<div class="item" data-value="${response.taskID}">${response.taskName}</div>`;
+                                    } else {
+                                        console.error('Unexpected response format:', response);
+                                    }
+
+
+                                    newRowElement.find('.task-dropdown .menu').html(taskOptions);
+                                    newRowElement.find('.task-dropdown').dropdown('clear');
+                                });
+                            }
+                        });
+
+
+                    });
+                });
+                timesheet.updateTotals();
+        }
+
+        //Function to validate the timesheet lines
+        timesheet.validateLineComment = function (input) {
+            const commentField = $(input);
+            const commentValue = commentField.val().trim();
+
+            if (commentValue.includes('<') || commentValue.includes('>')) {
+                commentField.closest('td').addClass('error');
+                commentField.closest('tr').addClass('editing-line'); 
+                return false;
+            } else {
+                commentField.closest('td').removeClass('error');
+                commentField.closest('tr').removeClass('editing-line');
+                return true;
+            }
+        };
+
+
+        // Function for cancel button
+        timesheet.timesheetLines.cancel = function (icon) {
+            const row = $(icon).closest('tr');
+            const tableId = row.closest('table').attr('id'); 
+            row.remove(); 
+            timesheet.timesheetLines.updateRowNumbers(tableId); 
+            timesheet.updateTotals(); 
+            timesheet.updateWeeklyTotal(); 
+        }
+
+        // Function to handle edit for timesheet lines
+        timesheet.timesheetLines.edit = function (icon) {
+            const row = $(icon).closest('tr');
+            const tableId = row.closest('table').attr('id');
+            var dateForSection = $('#' + tableId.replace('-table', '-date')).text().split('(')[1].split(')')[0];
+
+            row.find('input[name="engagement"]').data('original-value', row.find('input[name="engagement"]').val());
+            row.find('input[name="task"]').data('original-value', row.find('input[name="task"]').val());
+            row.find('input[type="text"]').data('original-value', row.find('input[type="text"]').val());
+            row.find('input[name="hours"]').data('original-value', row.find('input[name="hours"]').val());
+            row.find('input[name="minutes"]').data('original-value', row.find('input[name="minutes"]').val());
+            row.find('.ui.dropdown').dropdown('destroy');
+
+            timesheet.timesheetLines.fetchEngagements(dateForSection, function (engagements) {
+                const engagementDropdown = row.find('.engagement-dropdown .menu');
+                engagementDropdown.empty();
+
+                _.each(engagements, function (engagement) {
+                    engagementDropdown.append(`<div class="item" data-value="${engagement.engagementID}">${engagement.title}</div>`);
+                });
+
+                row.find('.engagement-dropdown').dropdown({
+                    onChange: function (value) {
+                        const taskDropdown = row.find('.task-dropdown');
+                        const taskMenu = taskDropdown.find('.menu');
+
+                        taskMenu.empty();
+                        taskDropdown.dropdown('clear');
+                        taskDropdown.find('.default.text').text('Select Task');
+                        updateTaskDropdown(value); 
+                    }
+                });
+
+                const initialEngagementId = row.find('input[name="engagement"]').val();
+                if (initialEngagementId) {
+                    updateTaskDropdown(initialEngagementId); 
+                }
+
+                row.find('.engagement-dropdown').dropdown('refresh');
+            });
+
+            // Function to populate tasks based on engagement ID
+            function updateTaskDropdown(engagementID) {
+                const taskDropdown = row.find('.task-dropdown');
+                const taskMenu = taskDropdown.find('.menu');
+
+                timesheet.getEngagementById(engagementID, function (response) {
+                    if (Array.isArray(response)) {
+                        const taskOptions = response.map(task =>
+                            `<div class="item" data-value="${task.taskID}">${task.taskName}</div>`
+                        ).join('');
+                        taskMenu.html(taskOptions);
+                    } else {
+                        console.error('Unexpected response format:', response);
+                    }
+
+                    taskDropdown.dropdown('refresh');
+
+                    if (taskMenu.children().length === 0) {
+                        taskDropdown.find('.default.text').text('No tasks available');
+                    }
+                });
+            }
+        
+            row.find('.ui.dropdown input').prop('disabled', false);
+            row.find('.ui.dropdown').dropdown('refresh');
+            row.find('input[type="text"]').prop('disabled', false);
+            row.addClass('editing');
+            $(icon).removeClass('blue edit').addClass('green check').attr('onclick', 'timesheet.timesheetLines.save(this)');
+            $(icon).siblings('.trash').removeClass('trash').addClass('cancel').attr('onclick', 'timesheet.timesheetLines.cancelEdit(this)');
+        };
+
+        // Function to handle when the user clicks on cancel while editing
+        timesheet.timesheetLines.cancelEdit = function (icon) {
+            var row = $(icon).closest('tr');
+            row.removeClass('editing');
+
+            const originalEngagement = row.find('input[name="engagement"]').data('original-value');
+            const originalTask = row.find('input[name="task"]').data('original-value');
+            const originalHours = row.find('input[name="hours"]').data('original-value');
+            const originalMinutes = row.find('input[name="minutes"]').data('original-value');
+
+            row.find('.engagement-dropdown').dropdown('set selected', originalEngagement);
+            row.find('.task-dropdown').dropdown('set selected', originalTask);
+            row.find('input[type="text"]').val(row.find('input[type="text"]').data('original-value'));
+            row.find('.hours-dropdown').dropdown('set selected', originalHours);
+            row.find('.minutes-dropdown').dropdown('set selected', originalMinutes);
+
+            var commentField = row.find('input[name="comments"]');
+            commentField.closest('td').removeClass('error');
+            commentField.closest('tr').removeClass('editing-line');
+
+            row.find('input').prop('disabled', true);
+            row.find('.ui.dropdown').dropdown('destroy');
+            $(icon).siblings('.check').removeClass('green check').addClass('blue edit').attr('onclick', 'timesheet.timesheetLines.edit(this)');
+            $(icon).removeClass('cancel').addClass('trash').attr('onclick', 'timesheet.timesheetLines.delete(this)');
+
+            timesheet.updateTotals();
+            timesheet.updateWeeklyTotal();
+
+        }
+
+        // Function to delete the timesheet line
+        timesheet.timesheetLines.delete = function (icon) {
+
+            var row = $(icon).closest('tr');
+            var tableId = $(row).closest('table').attr('id');
+            var lineID = $(row).find('input[type="number"]:eq(0)').val();
+
+            $.ajax({
+                url: `/api/timesheet/${lineID}`,
+                type: 'DELETE',
+                success: function (result) {
+                    helper.SuccessToast("ROW_DELETED");
+
+                    $(icon).closest('tr').remove();
+                    timesheet.timesheetLines.updateRowNumbers(tableId);
+                    timesheet.updateTotals();
+                    timesheet.updateWeeklyTotal();
+                },
+                error: function (err) {
+                    helper.ErrorToast("DELETE_FAIL", err);
+                }
+            });
+        }
+
+        //Add Weekend
+        var weekendCheckbox = document.querySelector('input[name="saturday"]', 'input[name="sunday"]');
+        var saturdaySection = document.querySelector('#saturday-header').closest('.timesheet-section');
+        var sundaySection = document.querySelector('#sunday-header').closest('.timesheet-section');
+
+        saturdaySection.style.display = 'none';
+        sundaySection.style.display = 'none';
+
+        weekendCheckbox.addEventListener('change', function () {
+            saturdaySection.style.display = this.checked ? 'block' : 'none';
+            sundaySection.style.display = this.checked ? 'block' : 'none';
+
+            if (this.checked) {
+                updateTotals('saturday-table');
+                updateTotals('sunday-table');
+            }
+        });
+
+        // Function to update the row numbers for the timesheet table
+        timesheet.timesheetLines.updateRowNumbers = function (tableId) {
+            let rows = $('#' + tableId + ' tbody tr');
+            rows.each(function (index, row) {
+                $(row).find('td:visible:first').text(index + 1);
+            });
+        };
+
+        // Function to update the total for a particular table
+        timesheet.updateTotals = function () {
+            $('.timesheet-table').each(function () {
+                let totalHours = 0;
+                let totalMinutes = 0;
+                let tableId = $(this).attr('id');
+
+
+                $(this).find('tbody tr').each(function () {
+                    var hours = parseInt($(this).find('.hours-dropdown input[name="hours"]').val()) || 0;
+                    var minutes = parseInt($(this).find('.minutes-dropdown input[name="minutes"]').val()) || 0;
+
+                    totalHours += hours;
+                    totalMinutes += minutes;
+                });
+
+                totalHours += Math.floor(totalMinutes / 60);
+                totalMinutes = totalMinutes % 60;
+
+
+                $(this).find('.totalHours').text(totalHours);
+                $(this).find('.totalMinutes').text(totalMinutes);
+            });
+        }
+
+        // Function to update the total for the whole week (all tables)
+        timesheet.updateWeeklyTotal = function () {
+            let totalHours = 0;
+            let totalMinutes = 0;
+
+            $('.timesheet-table').each(function () {
+                totalHours += parseInt($(this).find('.totalHours').text()) || 0;
+                totalMinutes += parseInt($(this).find('.totalMinutes').text()) || 0;
+            });
+
+            totalHours += Math.floor(totalMinutes / 60);
+            totalMinutes = totalMinutes % 60;
+
+            $('#weeklyTotalHours').text(totalHours);
+            $('#weeklyTotalMinutes').text(totalMinutes);
+        }
+
+        $('.ui.small.modal.submit').modal({
+            closable: false,
+            onApprove: function () {
+                timesheet.debouncedSubmit();
+            }
+        }).modal('attach events', '.ui.button.blue', 'show');
+
+        // API to handle the submit
+        timesheet.submit = function () {
+            timesheet.BindPostObject();
+            if (timesheet.validateComments() == false) {
+                helper.ErrorToast("SAVE_FAIL");
+                return;
+            }
+
+            $.ajax({
+                url: '/api/timesheet/Submit',
+                type: 'POST',
+                data: JSON.stringify(timesheet.objPost),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    $('.ui.small.modal.success').modal('show');
+                    timesheet.getTimesheetsDropdown();
+                },
+                error: function (err) {
+                    $('#errorSummaryModal #errorSummary').empty();
+                    $('#errorSummaryModal #errorSummary').append(`<h4>Please correct daily hours for the below dates (Should be between 08 to 12 Hours)</h4>`);
+
+                    const $errorList = $('<ul style="color:red;"></ul>');
+
+                    _.each($('.timesheet-table'), function (table) {
+                        const $table = $(table);
+                        const tableId = $table.attr('id');
+                        const dayName = tableId.split('-')[0].charAt(0).toUpperCase() + tableId.split('-')[0].slice(1);
+                        if (dayName === 'Saturday' || dayName === 'Sunday') {
+                            return;
+                        }
+                        const displayedDate = $('#' + tableId.replace('-table', '-date')).text().split('(')[1].split(')')[0];
+
+                        const totalHours = parseInt($table.find('.totalHours').text()) || 0;
+                        const totalMinutes = parseInt($table.find('.totalMinutes').text()) || 0;
+
+                        if ((totalHours < 8 ) || (totalHours > 12 || (totalHours === 12 && totalMinutes > 0))) {
+                            $errorList.append(`<li>${dayName} (${displayedDate})</li>`);
+                        }
+
+                    });
+
+                    $('#errorSummaryModal #errorSummary').append($errorList);
+                    $('#errorSummaryModal')
+                        .modal({
+                            closable: false  
+                        })
+                        .modal('show');
+                }
+            });
+        }
+
+        // Assign action for the Cancel button in the error summary modal
+        $('.deny.button').off('click').on('click', function () {
+            $('.ui.dimmer.modals').removeClass('visible active').addClass('hidden');
+        });
+
+        // Debounce function
+        function debounce(func, delay) {
+            let timeout;
+            return function () {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // Attach debounced click event to save timesheetlines and whole timesheet
+        timesheet.timesheetLines.debouncedSave = debounce(function (element) {
+            timesheet.timesheetLines.save(element);
+        }, 500);
+
+        timesheet.debouncedSubmit = debounce(function () {
+            timesheet.submit();
+        }, 500);
+
+        $(document).ready(function () {
+            timesheet.getTimesheetsDropdown();
+            timesheet.timesheetLines.add();
+            timesheet.getTimesheetHdr();
+            $('.ui.accordion').accordion();
+        });
+
+    </script>
+</body>
+</html>

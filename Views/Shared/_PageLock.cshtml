@@ -1,0 +1,59 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<style>
+    #pageLoader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+     #pageLoader .ui.loader {
+            font-size: 2rem;
+     }
+
+
+      #pageLoader p {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 30px;
+            color: #555;
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+      }
+
+
+</style>
+
+<script>
+    function _lockpage(msg) {
+        if (!_.isUndefined(msg)) {
+            $("#lockpagemessage").html(msg);
+        }
+        else {
+            $("#lockpagemessage").html("Loading...");
+        }
+        $('#pageLoader').fadeIn();
+    }
+
+    function _unlockpage() {
+        $('#pageLoader').fadeOut();
+    }
+</script>
+
+<!-- Page Loader -->
+<div id="pageLoader">
+    <div class="ui active large loader"></div>
+    <p id="lockpagemessage">Loading</p>
+</div>

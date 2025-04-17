@@ -1,0 +1,64 @@
+AUDIT TRAIL
+
+Table Keys and Their Associated Table Names
+
+This document serves as a reference for the audit trail table, mapping the table keys to their 
+corresponding table names for clarity and future audits.
+
+Table Key: Table Name Mapping
+
+1. Configuration
+   Operations:
+	- Updation
+
+2. Engagements
+   Operations:
+	- Insertion
+	- Updation
+
+3. UserManagerMapping
+   Operations:
+	- Insertion
+	- Deletion
+	- Updation
+
+4. EngagementUserMapping
+   Operations:
+	- Insertion
+	- Deletion
+	- Updation
+
+5. EngagementTaskMapping
+   Operations:
+	- Insertion
+	- Deletion
+
+6. EngagementTasks
+   Operations:
+	- Insertion
+	- Updation
+
+7. EngagementOwnerMapping
+	Operations:
+	- Insertion
+	- Deletion
+
+8. TimesheetHdr
+	Operations:
+	- Insertion
+	- Updation
+
+9. TimesheetLines
+	Operations:
+	- Insertion
+	- Updation
+	- Deletion
+
+10. TimesheetWorkflow
+	Operations:
+	- Insertion
+	- Updation
+
+11. Users
+	Operations:
+	- Updation

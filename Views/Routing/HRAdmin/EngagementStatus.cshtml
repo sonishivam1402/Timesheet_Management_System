@@ -1,0 +1,231 @@
+﻿<div class="main-component">
+    <!--HEADING-->
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">Engagement Status</h1>
+        </div>
+    </div>
+    <!--GRID-->
+    <div id="myGrid" class="ag-theme-alpine main-component_body" style="height: 80vh; width: 98.5%;"></div>
+</div>
+
+<!--MODAL-->
+<div class="ui medium centered modal" id="engagementDetailsModal" style="height: auto;">
+    <h1 class="ui center aligned blue header x-large" id="systemUserModalHeader">Engagement Details</h1>
+    <div class="content">
+        <div class="ui two column very relaxed grid">
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small tag icon"></i>
+                        <div class="content">
+                            Title
+                            <div id="modalEngagementTitle" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small calendar icon"></i>
+                        <div class="content">
+                            Duration
+                            <div id="modalDurationDate" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small file alternate icon"></i>
+                        <div class="content">
+                            Description
+                            <div id="modalEngagementDescription" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small user tie icon"></i>
+                        <div class="content">
+                            Owners
+                            <span id="ownerCount"></span>
+                            <div id="modalOwners"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui vertical segment">
+            <div class="ui header">
+                <i class="small users icon"></i>
+                <div class="content">
+                    Team Members
+                    <span id="teamMemberCount"></span>
+                    <div id="modalTeamMembers"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui vertical segment">
+            <div class="ui header">
+                <i class="small list icon"></i>
+                <div class="content">
+                    Tasks
+                    <span id="taskCount"></span>
+                    <div id="modalTasks"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui red button" onclick="$('#engagementDetailsModal').modal('hide');">Close</div>
+    </div>
+</div>
+
+<!--JAVASCRIPT-->
+<script>
+    var engagements = {};
+
+    // Column definitions for the AG Grid
+    var columnDefs = [
+        { headerName: "#", field: "SerialNumber", flex: 0.3, sortable: false },
+        {
+            headerName: "Engagements", field: "title", flex: 1, sortable: false,
+            cellRenderer: function (params) {
+                return `<a style="color: blue;" href="#" onclick="engagements.showDetails(${params.data.engagementID})">${params.value}</a>`;
+            }
+        },
+        {
+            headerName: "Owners",
+            field: "owners",
+            flex: 1,
+            valueFormatter: params => engagements.formatOwners(params.value),
+            sortable: false
+        },
+        { headerName: "Start Date", field: "startDate", valueFormatter: params => helper.DateForamt1(params.value), flex: 1 },
+        { headerName: "End Date", field: "endDate", valueFormatter: params => helper.DateForamt1(params.value), flex: 1 },
+        {
+            headerName: "Status",
+            field: "action",
+            flex: 0.5,
+            sortable: false,
+            cellRenderer: function (params) {
+                return params.data.isActive
+                    ? '<label class="fluid ui green basic label mt-2 centered">Active</label>'
+                    : '<label class="fluid ui red basic label mt-2 centered">InActive</label>';
+            },
+        },
+    ];
+
+    var gridOptions = {
+        columnDefs: columnDefs,
+        suppressMovable: true,
+        suppressDragLeaveHidesColumns: true,
+        rowData: [],
+        pagination: true,
+        paginationPageSize: 100,
+        paginationPageSizeSelector: [10, 25, 50, 100],
+    };
+
+    // Joins the names of multiple owners into a single comma-separated string
+    engagements.formatOwners = function (owners) {
+        if (!owners || !Array.isArray(owners)) return '';
+        return owners.map(owner => owner.ownerName || '').filter(name => name).join(', ');
+    }
+
+    // Show details
+    engagements.showDetails = function (engagementID) {
+        var engagement = engagements.allData.find(eng => eng.engagementID === engagementID);
+        if (!engagement) return;
+
+        $('#modalEngagementTitle').text(engagement.title);
+        $('#modalDurationDate').text(`${helper.DateForamt1(engagement.startDate)} to ${helper.DateForamt1(engagement.endDate)}`);
+        $('#modalEngagementDescription').text(engagement.description);
+
+        // Owners
+        var owners = engagement.owners ? (Array.isArray(engagement.owners) ? engagement.owners : engagement.owners.split(',').map(name => name.trim())) : [];
+        $('#ownerCount').text(" (" + owners.length + ")");
+        var ownersContainer = $('#modalOwners').empty();
+        owners.forEach(owner => {
+            var ownerName = owner.ownerName || owner;
+            var label = $('<label>')
+                .addClass('ui label gray')
+                .text(ownerName);
+            ownersContainer.append(label);
+        });
+
+        // Team Members
+        var teamMembers = engagement.teamMembers ?
+            (Array.isArray(engagement.teamMembers) ? engagement.teamMembers : engagement.teamMembers.split(',').map(name => name.trim())) : [];
+        $('#teamMemberCount').text(" (" + teamMembers.length + ")");
+        var teamMembersContainer = $('#modalTeamMembers').empty();
+        teamMembers.forEach(teamMember => {
+            var memberName = teamMember.teamMemberName || teamMember;
+            var label = $('<label>')
+                .addClass('ui label gray mb-2')
+                .text(memberName);
+            teamMembersContainer.append(label);
+        });
+
+        // Tasks
+        var tasks = engagement.tasks ?
+            (Array.isArray(engagement.tasks) ? engagement.tasks : engagement.tasks.split(',').map(task => task.trim())) : [];
+        $('#taskCount').text(" (" + tasks.length + ")");
+        var tasksContainer = $('#modalTasks').empty();
+        tasks.forEach(task => {
+            var taskName = task.taskName || task;
+            var label = $('<label>')
+                .addClass('ui label gray mb-2')
+                .text(taskName);
+            tasksContainer.append(label);
+        });
+
+        $('#engagementDetailsModal').modal({
+            centered: true,
+            detachable: false,
+            closable: true
+        }).modal('show');
+    }
+
+    // Load grid
+    engagements.loadGrid = function () {
+        $.ajax({
+            url: '/api/engagement',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                engagements.allData = response;
+
+                var gridData = response.map((item, index) => ({
+                    engagementID: item.engagementID,
+                    SerialNumber: index + 1,
+                    title: item.title,
+                    owners: item.owners,
+                    startDate: item.startDate,
+                    endDate: item.endDate,
+                    isActive: item.isActive
+                }));
+
+                // Wrap API call in setTimeout to avoid concurrency issue
+                setTimeout(() => {
+                    gridOptions.api.applyTransaction({ add: gridData });
+                }, 0);
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching data:', status, error);
+            }
+        });
+    }
+
+    // Initialize the grid
+    $(document).ready(function () {
+        var eGridDiv = document.querySelector('#myGrid');
+        new agGrid.Grid(eGridDiv, gridOptions);
+        engagements.loadGrid(); // Call to load the data after the grid is initialized
+    })
+</script>

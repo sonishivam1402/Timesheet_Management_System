@@ -1,0 +1,584 @@
+﻿    <style>
+        .main-container {
+            width: 100%;
+        }
+
+        .ui.container {
+            width: 100%;
+            text-align: left;
+            margin: 0; 
+        }
+
+        .ui.modal#weekReportModal {
+            top: 46% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 100%;
+            height: 100%;
+        }
+
+        .right.floated{
+            float: right;
+        }
+
+        .alt-row {
+            background-color: #e6f7ff; 
+        }
+
+        .regular-row {
+        background-color: #ffffff;
+        }
+
+    .ui.modal.dimmed {
+        pointer-events: none;
+    }
+
+    .ui.tiny.modal#confirmationModal {
+        width: 400px !important; 
+        height: 200px !important; 
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important; 
+    }
+
+    .ui.modal#commentsModal {
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        height: auto;
+    }
+
+    #commentsBody {
+        font-size: 17px;
+    }
+    </style>
+
+    <div class="main-component">
+            <div class="ui container main-component_heading">
+                <h1 class="ui header">Pending Approvals</h1>
+
+                <!-- Card for no pending approvals -->
+                <div class="ui segment" id="noTimesheetMessage" style="display: none; width: 800px; ">
+                    <div class="ui icon message">
+                        <i class="info circle icon"></i>
+                        <div class="content">
+                            <div class="header">No Pending Approvals</div>
+                            <p>You don’t have any timesheets pending for approval</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ag-theme-alpine" id="pendingApprovalsGrid" style="height: 80vh; width: 77vw; ">
+                
+                </div>
+            </div>
+    </div>
+
+    <div class="ui modal" id="weekReportModal">
+        <i class="close icon black" style="position: absolute; top: 10px; right: 10px;"></i>
+    <div class="ui header"><span id="userName"></span>    <label id="duration" class="ui basic large label blue"></label><label id="hours" class="ui basic large label orange"></label></div>
+        <div class="scrolling content">
+            <div class="ui styled fluid accordion">
+
+            </div>
+        </div>
+    <div class=" content ui form">
+        <div class="field">
+            <textarea id="comments" placeholder="Enter your comments here..." style="height: 20px; min-height:5em;" oninput="timesheets.validateComments()"></textarea>
+            <div class="ui basic red pointing prompt label transition" id="comments-error" style="display: none;">
+                Comments cannot contain angle brackets (&lt; or &gt;).
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui red button" onclick="timesheets.openConfirmationModal('reject')"><i class="times icon"></i>Reject</button>
+        <button class="ui green button" onclick="timesheets.openConfirmationModal('approve')"><i class="check icon"></i>Approve</button>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="ui tiny modal" id="confirmationModal">
+        <div class="header" id="confirmationHeader">Confirm Action</div>
+        <div class="content">
+            <p id="confirmationMessage">Are you sure you want to proceed?</p>
+        </div>
+        <div class="actions">
+            <button class="ui red deny button" onclick="$('#confirmationModal').modal('hide'); $('#weekReportModal').removeClass('dimmed');">Cancel</button>
+            <button class="ui green approve button" id="confirmButton">Confirm</button>
+        </div>
+    </div>
+    </div>
+
+@*  Comments Modal *@
+<div class="ui medium modal" id="commentsModal">
+    <i class="close icon"></i>
+    <div class="header">
+        Comments
+    </div>
+    <div class="scrolling content">
+        <div class="ui connected feed" id="commentsBody">
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui red button" id="modal-close-btn-comment">Close</button>
+    </div>
+</div>
+
+    <script>
+
+        var timesheets = {};
+        timesheets.data = {};
+        timesheets.objPost = {
+        "TimesheetID": 0,
+        "ApprovalComment": ""
+        };
+
+        timesheets.BindPostObject = function (){
+            timesheets.objPost.TimesheetID = timesheets.selectedTimesheetId,
+            timesheets.objPost.ApprovalComment = $('.ui.modal textarea').val();
+        }
+
+        timesheets.get = function () {
+            $.ajax({
+                url: `/api/timesheet/GetPendingTimesheets`,
+                method: 'GET',
+                success: function (response) {
+                    timesheets.data = response.data || [];
+                    timesheets.loadGrid();
+                }
+            });
+        }
+
+        timesheets.validateComments = function () {
+            var commentsField = $('#comments');
+            var commentsError = $('#comments-error');
+            var commentsValue = commentsField.val().trim();
+
+            if (commentsValue.includes('<') || commentsValue.includes('>')) {
+                commentsError.fadeIn();
+                commentsField.closest('.field').addClass('error');
+                return false;
+            } else {
+                commentsError.fadeOut();
+                commentsField.closest('.field').removeClass('error');
+                return true;
+            }
+        };
+
+        timesheets.objGrid = {}
+        timesheets.loadGrid = function () {
+
+            if (!timesheets.data || timesheets.data.length === 0) {
+                $("#pendingApprovalsGrid").hide();          
+                $("#noTimesheetMessage").show();             
+                return;                                     
+            } else {
+                $("#pendingApprovalsGrid").show();           
+                $("#noTimesheetMessage").hide();             
+            }
+
+            $("#pendingApprovalsGrid").empty();
+            //document.querySelector("#pendingApprovalsGrid").style.minHeight = "500px";
+            timesheets.objGrid = null;
+
+        var gridOptions = {
+            rowData: timesheets.data,
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                cellStyle: {
+                    fontSize: '16px',
+                }
+            },
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+
+            columnDefs: [
+                {
+                    headerName: "#",
+                    valueGetter: "node.rowIndex + 1",
+                    minWidth: 50,
+                    filter: false
+                    //cellStyle: { textAlign: 'center' }
+                },
+                {
+                    headerName: "Name",
+                    field: "employeeName",
+                    flex: 2,
+                    minWidth: 150
+                },
+                {
+                    headerName: "Duration",
+                    valueGetter: params => params.data.displayTitle,
+                    flex: 5,
+                    minWidth: 300
+                },
+                {
+                    headerName: "Time",
+                    valueGetter: params => params.data.hours +"h "+ params.data.minutes+"m",
+                    //flex: 1,
+                    minWidth: 100,
+                    width: 100,
+                    filter: false
+                },
+                {
+                    headerName: "Submitted On",
+                    valueGetter: params => helper.ToLocalDate2(params.data.submittedOn),
+                    flex: 1,
+                    minWidth: 180
+                },
+                {
+                    headerName: "Comments",
+                    filter: false,
+                    cellStyle: {
+                        textAlign: 'center'
+                    },
+                    cellRenderer: function (params) {
+                        return `
+                            <div class="ui mini left labeled button" tabindex="0" data-timesheet-id="${params.data.timesheetID}">
+                                <a class="ui mini basic right pointing label">
+                                    ${params.data.commentsCount || 0}
+                                    </a>
+                                <div class="ui mini button" onclick = "timesheets.openCommentsModal('${params.data.timesheetID}')">
+                                        Comments
+                                </div>
+                            </div>`;
+                    },
+                    pinned: 'right',
+                    lockPinned: true
+                },
+                {
+                    headerName: "Actions",
+                    cellStyle: {
+                        textAlign: 'center',
+                        fontSize: '16px'
+                    },
+                    cellRenderer: function (params) {
+                        return `<button onclick="timesheets.openReviewModal('${params.data.timesheetID}', '${params.data.employeeName}', '${params.data.displayTitle}', '${params.data.hours}', '${params.data.minutes}')" class="mb-1 ui button blue approve button"><i class="eye icon"></i>Review</button>`;
+                    },
+                    pinned: 'right',
+                    lockPinned: true,
+                    filter: false,
+                    sortable: false,
+                    minWidth: 150
+                }
+            ],
+
+            onFirstDataRendered: params => {
+                params.api.sizeColumnsToFit();
+            },
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();
+            }
+        };
+
+        timesheets.objGrid = new agGrid.Grid(document.querySelector("#pendingApprovalsGrid"), gridOptions);
+
+        }
+
+        timesheets.submissionCommentRenderer = function(params) {
+            var text = params.value || "";
+            var maxLength = 15; 
+
+            if (text.length > maxLength) {
+                var truncatedText = text.substring(0, maxLength) + ".....";
+                return `<span>${truncatedText}</span>`;
+            }
+            return text;
+        }
+
+        timesheets.openReviewModal = function (Id, empName, duration, hours, minutes) {
+            $('.ui.dimmer.modals').removeClass('hidden').addClass('visible');
+            timesheets.selectedTimesheetId = Id;
+            $('#userName').text(empName);
+            $('#duration').text(duration + "  Report");
+            $('#hours').text("Total: "+hours+"h "+ minutes+ "m");
+
+            $.ajax({
+               url: `/api/timesheet/${Id}`,
+               method: 'GET',
+               success: function (data) {
+                   timesheets.populateWeekReportTable(data);
+                   $('#weekReportModal').modal('show'); 
+               },
+               error: function (error) {
+                    helper.ErrorToast('LOAD_FAIL');
+               }
+            });
+        }
+
+        timesheets.populateWeekReportTable = function (data) {
+       
+            $('.ui.accordion').empty();
+
+            var groupedData = _.groupBy(data, (report) =>
+                moment(report.date).format('YYYY-MM-DD')
+            );
+
+            var sortedDates = _.sortBy(Object.keys(groupedData), (date) =>
+                moment(date)
+            );
+
+            _.each(sortedDates, (date, index) => {
+                var reports = groupedData[date];
+                var dayOfWeek = moment(date).format('dddd');
+                var formattedDate = moment(date).format('DD MMM YYYY');
+
+                var isWeekend = dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
+
+                var totalMinutes = _.reduce(reports, (sum, report) => sum + report.hours * 60 + report.minutes, 0);
+                var totalHours = Math.floor(totalMinutes / 60);
+                var remainingMinutes = totalMinutes % 60;
+
+                var tableRows = _.map(reports, (report, rowIndex) => {
+
+                    var tooltip = report.comment
+                        ? `data-tooltip="${report.comment}" data-position="top left"`
+                        : '';
+
+                    return `
+                            <tr class="${rowIndex % 2 == 0 ? 'alt-row' : 'regular-row'}">
+                            <td>${rowIndex + 1}</td>
+                            <td>${dayOfWeek}</td>
+                            <td>${helper.DateForamt1(report.date)}</td>
+                            <td>${report.engagementName}</td>
+                            <td>${report.taskName}</td>
+                            <td ${tooltip}>${report.comment || ''}</td>
+                            <td>${report.hours}</td>
+                            <td>${report.minutes}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                var accordionSection = `
+                    <div class="title ${index === -1 ? 'active' : ''}" style="${isWeekend ? 'background-color: #ecffe2;' : ''}">
+                        <i class="dropdown icon"></i>
+                        <span>${dayOfWeek} - ${formattedDate}</span>
+                        <span class="ui basic meduim label black">Total: ${totalHours}h ${remainingMinutes}m</span>
+                    </div>
+                    <div class="content ${index === -1 ? 'active' : ''}" style="${isWeekend ? 'background-color: #ecffe2;' : ''}">
+                        <table class="ui celled table">
+                            <thead>
+                                <tr>
+                                   <th style="width: 50px;">#</th>
+                                   <th style="width: 80px;">Day</th>
+                                   <th style="width: 120px;">Date</th>
+                                   <th>Engagement</th>
+                                   <th>Task</th>
+                                   <th style="width: 500px;">Comment</th>
+                                   <th style="width: 80px;">Hours</th>
+                                   <th style="width: 80px;">Minutes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                $('.ui.accordion').append(accordionSection);
+            });
+
+            // Initialize accordion
+            $('.ui.accordion').accordion();
+        };
+
+
+
+        timesheets.selectedTimesheetId = 0;
+
+        timesheets.approveTimesheet = function() {
+            timesheets.BindPostObject();
+            if (!timesheets.validateComments()) {
+                helper.ErrorToast("SAVE_FAIL");
+                return;
+            }
+
+            $.ajax({
+                url: '/api/timesheet/Approve',
+                type: 'POST',
+                data: JSON.stringify(timesheets.objPost),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                helper.SuccessToast("APPROVAL_SUCCESS");
+                    timesheets.data = timesheets.data.filter(item => item.timesheetID !== parseInt(timesheets.selectedTimesheetId));
+                    $('.ui.modal textarea').val("");
+                $('#weekReportModal').modal('hide');
+                    timesheets.loadGrid();
+                },
+                error: function (err) {
+                    helper.ErrorToast(err.responseText);
+                }
+            });
+        }
+
+    var openCommentsModal = (timesheetId) => {
+        $.ajax({
+            url: `/api/timesheet/gettimesheetcomments?timesheetId=${timesheetId}`,
+            method: 'GET',
+            success: (data) => {
+                
+                populateComments(data);
+                $('#commentsModal').modal('show');
+            }
+        });
+    };
+
+    var populateComments = (data) => {
+        $('#commentsBody').empty();
+
+        if (!data || data.length === 0) {
+            $('#commentsBody').append('<div>No comments available</div>');
+            return;
+        }
+
+        data.forEach((comment) => {
+            let iconClass = '';
+            let type = '';
+
+            // Determine icon and color based on comment type
+            if (comment.commentType === 1) {
+                iconClass = 'blue paper plane circle icon mt-1';
+                type = '<span class="ui medium blue text">submitted</span>';
+            } else if (comment.commentType === 2) {
+                iconClass = 'red exclamation circle icon mt-1';
+                type = '<span class="ui medium red text">rejected</span>';
+            } else {
+                iconClass = 'green check circle icon mt-1';
+                type = '<span class="ui medium green text">approved</span>';
+            }
+
+            // Construct the HTML for each comment
+            var commentHtml = `
+                    <div class="event">
+                        <div class=" ${helper.getRandomColor()} label" data-text="${helper.getInitials(comment.commentByUser)}">
+                        </div>
+                        <div class="content">
+                            <div class="summary">
+                                <a class="user blue label">
+                                    ${comment.commentByUser}
+                                    </a> <i>${type}</i> the Timesheet
+                                <div class="date">
+                                    ${helper.formatRelativeTime2(comment.commentDate)}
+                                </div>
+                            </div>
+                            <div class="extra text">
+                                    <i style="color:#74777a;"> '${comment.commentText}' </i>
+                            </div>
+                            <div class="meta"></div>
+                        </div>
+                    </div>
+                `;
+
+            $('#commentsBody').append(commentHtml);
+        });
+    };
+
+    timesheets.openCommentsModal = (timesheetId) => openCommentsModal(timesheetId);
+
+
+    $('#modal-close-btn-comment').on('click', function () {
+        $('#commentsModal').modal('hide');
+    });
+
+
+        timesheets.rejectTimesheet = function () {
+            let rejectionData = {
+                TimesheetID: timesheets.selectedTimesheetId,
+                RejectionComment: $('.ui.modal textarea').val()
+            };
+
+            if (!timesheets.validateComments()) {
+                helper.ErrorToast("SAVE_FAIL");
+                return;
+            }
+
+            $.ajax({
+                url: '/api/timesheet/Reject',
+                type: 'POST',
+                data: JSON.stringify(rejectionData),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    helper.SuccessToast("REJECTED_SUCCESS");
+                    timesheets.data = timesheets.data.filter(item => item.timesheetID !== parseInt(timesheets.selectedTimesheetId));
+                    $('.ui.modal textarea').val("");
+                    $('#weekReportModal').modal('hide');
+                    timesheets.loadGrid();
+                },
+                error: function (err) {
+                    helper.ErrorToast(err.responseText || "REJECTED_FAIL");
+                }
+            });
+        }
+    
+    // Debounce function
+    function debounce(func, delay) {
+        let timeout;
+        return function () {
+            var context = this;
+            var args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    timesheets.openConfirmationModal = function (actionType) {
+        let message = actionType === 'approve' ? "Are you sure you want to approve this timesheet?" : "Are you sure you want to reject this timesheet?";
+        $('#confirmationMessage').text(message);
+        $('#confirmationHeader').text(actionType === 'approve' ? "Confirm Approval" : "Confirm Rejection");
+
+        // Assign debounced action for the Confirm button in the confirmation modal
+        $('#confirmButton').off('click').on('click', debounce(function () {
+            $('#confirmationModal').modal('hide');
+            $('#weekReportModal').removeClass('dimmed');
+            $('.ui.dimmer.modals').removeClass('visible').addClass('hidden');
+
+            // Call respective function based on actionType
+            actionType === 'approve' ? timesheets.approveTimesheet() : timesheets.rejectTimesheet();
+        }, 500)); // Adjust debounce delay as needed
+
+        // Assign action for the Cancel button in the confirmation modal
+        $('.deny.button').off('click').on('click', function () {
+            $('#confirmationModal').modal('hide');
+            $('#weekReportModal').removeClass('dimmed');
+
+            // Return to the main modal without performing any action
+            setTimeout(function () {
+                $('#weekReportModal').modal('show');
+            }, 300);
+        });
+
+        // Dim the main modal and open the confirmation modal
+        $('#weekReportModal').addClass('dimmed');
+        $('#confirmationModal').modal({
+            allowMultiple: true,
+            closable: false,
+            dimmer: true,
+            autofocus: false
+        }).modal('show');
+    };
+
+    timesheets.CommentRenderer = function (params) {
+        var text = params.value || "";
+        var maxLength = 15;
+
+        if (text.length > maxLength) {
+            var truncatedText = text.substring(0, maxLength) + ".....";
+            return `<span>${truncatedText}</span>`;
+        }
+        return text;
+    }
+
+        $(document).ready(function () {
+
+            timesheets.get();
+
+        });
+</script>
+
+

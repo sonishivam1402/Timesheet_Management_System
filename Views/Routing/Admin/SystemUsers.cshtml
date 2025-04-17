@@ -1,0 +1,333 @@
+﻿<style>
+    .dimmable.undetached.scrolling {
+        height: 0 !important;
+    }
+</style>
+
+<div class="main-component">
+    <!--HEADING-->
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">List of Users</h1>
+        </div>
+    </div>
+
+    <!-- GRID -->
+    <div id="systemUserGrid" class="ag-theme-alpine main-component_body" style="height: 80vh; width: 100%;"></div>
+</div>
+
+<!--MODAL-->
+<div class="ui medium modal" id="systemUserModal">
+    <h1 class="ui center aligned header x-large" id="systemUserModalHeader">Edit System User</h1>
+    <div class="content" style="overflow-y: auto;">
+        <div class="ui form">
+            <div class="ui medium header field">
+                <label for="txtEmployeeID">Employee ID</label>
+                <input type="text" id="txtEmployeeID" placeholder="Employee ID">
+            </div>
+            <div class="ui medium header field">
+                <label for="txtDisplayName">Display Name</label>
+                <input type="text" id="txtDisplayName" placeholder="Display Name">
+            </div>
+            <div class="ui medium header field">
+                <label for="txtEmail">Email</label>
+                <input type="email" id="txtEmail" placeholder="Email">
+            </div>
+            <div class="ui medium header field">
+                <label for="ddlLocation">Location</label>
+                <div class="ui search selection dropdown" id="ddlLocation">
+                    <input type="hidden" name="location">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Location</div>
+                    <div class="menu" id="ddlLocationMenu"></div>
+                </div>
+            </div>
+            <div class="ui medium header field">
+                <label for="ddlDepartment">Department</label>
+                <div class="ui search selection dropdown" id="ddlDepartment">
+                    <input type="hidden" name="department">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Department</div>
+                    <div class="menu" id="ddlDepartmentMenu"></div>
+                </div>
+            </div>
+            <div class="ui medium header field">
+                <label for="ddlRoles">Roles</label>
+                <div class="ui search multiple selection dropdown" id="ddlRoles">
+                    <input type="hidden" name="roles">
+                    <i class="dropdown icon"></i>
+                    <div class="default text" style="font-size: large;">Select Roles</div>
+                    <div class="menu" id="ddlRolesMenu"></div>
+                </div>
+            </div>
+            <div class="ui medium header field">
+                <label for="toggleActiveStatus">Active Status</label>
+                <div class="ui toggle checkbox">
+                    <input type="checkbox" id="toggleActiveStatus" name="active-status">
+                    <label>Active</label>
+                </div>
+            </div>
+        </div>
+        <div class="actions ui m-3">
+            <button class="ui large blue right floated button" id="saveUserBtn">
+                <i class="ui save icon"></i> Save
+            </button>
+            <button class="ui large red right floated button" id="closeSystemUserModal">
+                <i class="ui cancel icon"></i> Cancel
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    var systemUser = {};
+
+    // Data storage
+    systemUser.data = [];
+    systemUser.lookupData = {
+        roles: [],
+        departments: [],
+        locations: []
+    };
+    systemUser.selectedUserID = null;
+
+    // Fetch lookup values
+    systemUser.fetchLookupValues = async function () {
+        try {
+            var response = await $.ajax({
+                url: `/api/Helper/GetLookupValues/3228D5A1-DA07-45AC-8F99-CDE6C239EC6B%2C739F2F0D-76F0-4FB9-A778-B97AE5173629%2CE771BF28-E6E9-4263-B9F4-29D80B38C8E0`,
+                type: 'GET'
+            });
+
+            systemUser.lookupData.roles = response.filter(item => item.categoryName === 'Roles');
+            systemUser.lookupData.departments = response.filter(item => item.categoryName === 'Departments');
+            systemUser.lookupData.locations = response.filter(item => item.categoryName === 'Locations');
+
+            systemUser.populateDropdowns();
+        } catch (error) {
+            helper.ErrorToast("Failed to Load Lookup Values. Please Try Again.");
+        }
+    }
+
+    // Get users
+    systemUser.getSystemUsers = async function () {
+        try {
+            var response = await $.ajax({
+                url: `api/admin/system-user`,
+                type: 'GET'
+            });
+
+            systemUser.data = response;
+            systemUser.loadGrid();
+        } catch (error) {
+            helper.ErrorToast("Failed to Load System Users. Please Try Again.");
+        }
+    }
+
+    // Populate dropdowns
+    systemUser.populateDropdowns = function () {
+        // Location
+        var locationMenu = document.getElementById('ddlLocationMenu');
+        locationMenu.innerHTML = systemUser.lookupData.locations.map(location =>
+            `<div class="item" data-value="${location.key}" data-id="${location.value}">${location.key}</div>`
+        ).join('');
+
+        // Department
+        var departmentMenu = document.getElementById('ddlDepartmentMenu');
+        departmentMenu.innerHTML = systemUser.lookupData.departments.map(department =>
+            `<div class="item" data-value="${department.key}" data-id="${department.value}">${department.key}</div>`
+        ).join('');
+
+        // Roles
+        var rolesMenu = document.getElementById('ddlRolesMenu');
+        rolesMenu.innerHTML = systemUser.lookupData.roles.map(role =>
+            `<div class="item" data-value="${role.key}" data-id="${role.value}">${role.key}</div>`
+        ).join('');
+
+        $('.ui.dropdown').dropdown();
+    }
+
+    // Get LocationID
+    systemUser.getLocationID = function (locationName) {
+        if (!locationName || locationName.trim() === '') return null;
+        var location = systemUser.lookupData.locations.find(loc => loc.key === locationName);
+        return location ? location.value : null;
+    }
+
+    // Get DepartmentID
+    systemUser.getDepartmentID = function (departmentName) {
+        if (!departmentName || departmentName.trim() === '') return null;
+        var department = systemUser.lookupData.departments.find(dept => dept.key === departmentName);
+        return department ? department.value : null;
+    }
+
+    // Load grid
+    systemUser.loadGrid = function () {
+        $("#systemUserGrid").empty();
+
+        var gridOptions = {
+            rowData: systemUser.data,
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                cellStyle: { fontSize: '16px' }
+            },
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            columnDefs: [
+                { headerName: "#", valueGetter: "node.rowIndex + 1", width: 60, filter: false, sortable: false },
+                { headerName: "Name", field: "displayName", minWidth: 200 },
+                { headerName: "Email", field: "email", minWidth: 250 },
+                {
+                    headerName: "Roles",
+                    field: "userRoleName",
+                    valueFormatter: params => {
+                        var roles = params.value || [];
+                        var cleanedRoles = roles.map(role => role.trim()).filter(role => role);
+                        return cleanedRoles.length > 0 ? cleanedRoles.join(", ") : "No Roles Assigned";
+                    },
+                    tooltipValueGetter: params => params.value,
+                    width: 150
+                },
+                { headerName: "Employee Id", field: "employeeID", minWidth: 150 },
+                { headerName: "Active", field: "isActive", width: 100, filter: false, sortable: false },
+                { headerName: "Department", field: "departmentName", minWidth: 200 },
+                { headerName: "Location", field: "locationName", minWidth: 200 },
+                {
+                    headerName: "Modified On",
+                    valueGetter: params => helper.ToLocalDate2(params.data.modifiedOn),
+                    minWidth: 200
+                },
+                {
+                    headerName: "Modified By",
+                    field: "modifiedBy",
+                    minWidth: 100,
+                    valueGetter: params => params.data.modifiedBy || "--"
+                },
+                {
+                    headerName: "Action",
+                    cellStyle: { textAlign: 'center' },
+                    cellRenderer: (params) => {
+                        return `<button onclick="systemUser.editUser(${params.data.userID})" class="ui medium button blue"><i class="edit icon"></i>Edit</button>`;
+                    },
+                    pinned: 'right',
+                    lockPinned: true,
+                    filter: false,
+                    sortable: false,
+                    width: 130,
+                    minWidth: 130
+                }
+            ]
+        };
+
+        new agGrid.Grid(document.querySelector("#systemUserGrid"), gridOptions);
+    }
+
+    // Edit user
+    systemUser.editUser = function (userID) {
+        var selectedUser = systemUser.data.find(user => user.userID === userID);
+
+        if (selectedUser) {
+            systemUser.selectedUserID = userID;
+
+            $('#txtEmployeeID').val(selectedUser.employeeID);
+
+            $('#txtDisplayName')
+                .val(selectedUser.displayName)
+                .prop('disabled', true);
+
+            $('#txtEmail')
+                .val(selectedUser.email)
+                .prop('disabled', true);
+
+            $('#ddlLocation').dropdown('set selected', selectedUser.locationName);
+
+            $('#ddlDepartment').dropdown('set selected', selectedUser.departmentName);
+
+            $('#ddlRoles').dropdown('clear');
+            var userRoles = selectedUser.userRoleName || [];
+            if (userRoles.length > 0) {
+                var trimmedRoles = userRoles.map(role => role.trim());
+                $('#ddlRoles').dropdown('set exactly', trimmedRoles);
+            } else {
+                $('#ddlRoles').dropdown('restore defaults');
+            }
+
+            $('#toggleActiveStatus').prop('checked', selectedUser.isActive === true || selectedUser.isActive === "true");
+
+            $('#systemUserModal').modal('show');
+        }
+    }
+
+    // Save user
+    systemUser.saveUser = async function () {
+        var userPayload = {
+            userID: systemUser.selectedUserID,
+            isActive: $('#toggleActiveStatus').is(':checked'),
+            employeeID: $('#txtEmployeeID').val(),
+            locationID: systemUser.getLocationID($('#ddlLocation').dropdown('get value')),
+            departmentID: systemUser.getDepartmentID($('#ddlDepartment').dropdown('get value')),
+            roles: $('#ddlRoles')
+                .dropdown('get value')
+                .split(',')
+                .filter(role => role && role !== '')
+                .map(roleKey => {
+                    var roleItem = systemUser.lookupData.roles.find(r => r.key === roleKey);
+                    return roleItem ? roleItem.value : null;
+                })
+                .filter(roleId => roleId !== null)
+                .join(',')
+        };
+
+        try {
+            await $.ajax({
+                url: `/api/Admin/updateSystemUser`,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(userPayload)
+            });
+
+            systemUser.getSystemUsers();
+            $('#systemUserModal').modal('hide');
+            helper.SuccessToast('User Updated Successfully');
+        } catch (error) {
+            helper.ErrorToast("Failed to Update User. Please Try Again.");
+        }
+    }
+
+    // Initialize
+    systemUser.initSystemUsers = async function () {
+        $('#systemUserModal').modal({
+            observeChanges: true,
+            centered: true,
+            detachable: false,
+            closable: true
+        });
+
+        $('.ui.dropdown').dropdown();
+        $('#ddlLocation, #ddlDepartment, #ddlRoles').dropdown({
+            on: 'click',
+            allowAdditions: false,
+            multiple: true,
+            fullTextSearch: true,
+            forceSelection: false
+        });
+
+        $('.ui.toggle.checkbox').checkbox();
+
+        await systemUser.fetchLookupValues();
+        await systemUser.getSystemUsers();
+
+        $('#saveUserBtn').on('click', () => systemUser.saveUser());
+        $('#closeSystemUserModal').on('click', () => $('#systemUserModal').modal('hide'));
+    }
+
+    // Document ready
+    $(document).ready(async function () {
+        await systemUser.initSystemUsers();
+    });
+</script>

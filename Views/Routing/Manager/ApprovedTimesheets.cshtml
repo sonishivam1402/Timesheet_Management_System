@@ -1,0 +1,411 @@
+﻿<style>
+    .ui.modal#weekReportModal {
+        top: 46% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 100%;
+        height: 90%;
+    }
+
+    .right.floated{
+        float:right;
+    }
+
+    .ui.modal .content {
+        padding: 20px;
+    }
+
+    .clickable-name:hover {
+        color: blue;
+    }
+
+    .alt-row {
+        background-color: #e6f7ff;
+    }
+
+    .regular-row {
+        background-color: #ffffff;
+    }
+
+    .ui.modal#commentsModal {
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        height: auto;
+    }
+
+    #commentsBody {
+        font-size: 17px;
+    }
+
+
+</style>
+
+<div class="main-component">
+    <div class="ui container main-component_heading">
+        <h1 class="ui header">Approved Timesheets</h1>
+         
+        <!-- Card for no pending approvals -->
+        <div class="ui segment" id="noTimesheetMessage" style="display: none; width: 800px; ">
+            <div class="ui icon message">
+                <i class="info circle icon"></i>
+                <div class="content">
+                    <div class="header">No Approved Timesheets</div>
+                    <p>You don’t have any approved timesheets.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ag-theme-alpine" id="approvedTimesheetGrid" style="height: 80vh; width: 77vw;">
+        </div>
+    </div>
+</div>
+
+
+
+<div class="ui modal" id="weekReportModal">
+    <i class="close icon black" style="position: absolute; top: 10px; right: 10px;"></i>
+    <div class="ui header"><span id="userName"></span>    <label id="duration" class="ui basic large label blue"></label><label id="hours" class="ui basic large label orange"></label></div>
+    <div class="scrolling content">
+        <div class="ui styled fluid accordion">
+        </div>
+    </div>
+    <div class="actions">
+        <div class="ui cancel red button">Cancel</div>
+    </div>
+</div>
+
+@*  Comments Modal *@
+<div class="ui medium modal" id="commentsModal">
+    <i class="close icon"></i>
+    <div class="header">
+        Comments
+    </div>
+    <div class="scrolling content">
+        <div class="ui connected feed" id="commentsBody">
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui red button" id="modal-close-btn-comment">Close</button>
+    </div>
+</div>
+
+
+<script>
+
+    var timesheets = {};
+    timesheets.data = {};
+
+    timesheets.get = function () {
+        $.ajax({
+            url: `/api/timesheet/approved`,
+            method: 'GET',
+            success: function (response) {
+                if (response.data == null) {
+                    timesheets.data = response.data;
+                }else{
+                    response.data.sort((a, b) => new Date(b.approvedOn) - new Date(a.approvedOn));
+                    timesheets.data = response.data;
+                }
+                timesheets.loadGrid();
+            }
+        });
+    }
+
+    timesheets.objGrid = {}
+    timesheets.loadGrid = function () {
+
+        if (!timesheets.data || timesheets.data.length === 0) {
+            $("#approvedTimesheetGrid").hide();
+            $("#noTimesheetMessage").show();
+            return;
+        } else {
+            $("#approvedTimesheetGrid").show();
+            $("#noTimesheetMessage").hide();
+        }
+
+        $("#approvedTimesheetGrid").empty();
+        timesheets.objGrid = null;
+        const gridOptions = {
+            rowData: timesheets.data,
+            suppressMovable: true,
+            suppressDragLeaveHidesColumns: true,
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                cellStyle: {fontSize: '16px' },
+                resizable: true
+            },
+            pagination: true,
+            paginationPageSize: 100,
+            paginationPageSizeSelector: [10, 25, 50, 100],
+            onGridReady: (params) => {
+                params.api.sizeColumnsToFit(); 
+            },
+            onGridSizeChanged: params => {
+                params.api.sizeColumnsToFit();  
+            },
+            columnDefs: [
+                { headerName: "#", valueGetter: "node.rowIndex + 1", minWidth: 60, filter: false, sortable: false},
+                {
+                    headerName: "Name",
+                    field: "employeeName",
+                    minWidth: 200
+                },
+                {
+                    headerName: "Duration",
+                    valueGetter: params => {
+                        return params.data.displayTitle;
+                    },
+                    minWidth: 280
+                },
+                {
+                    headerName: "Submitted On",
+                    valueGetter: params => helper.ToLocalDate2(params.data.submittedOn),
+                    minWidth: 200
+                },
+                {
+                    headerName: "Approved On",
+                    valueGetter: params => params.data.approvedOn ? helper.ToLocalDate2(params.data.approvedOn) : "--",
+                    minWidth: 250
+                },
+                {
+                    headerName: "Time",
+                    valueGetter: params => params.data.hoursTotal + "h " + params.data.minutesTotal + "m",
+                    minWidth: 100, filter: false, sortable: false
+                },
+                { headerName: "Approved By", field: "approvedBy", minWidth: 150 },
+                {
+                    headerName: "Comments",
+                    filter: false,
+                    cellStyle: {
+                        textAlign: 'center'
+                    },
+                    cellRenderer: function (params) {
+                        return `
+                        <div class="ui mini left labeled button" tabindex="0" data-timesheet-id="${params.data.timesheetID}">
+                            <a class="ui mini basic right pointing label">
+                                ${params.data.commentsCount || 0}
+                                </a>
+                            <div class="ui mini button" onclick = "timesheets.openCommentsModal('${params.data.timesheetID}')">
+                                    Comments
+                                        </div>
+                                        </div>`;
+                    },
+                    pinned: 'right',
+                    lockPinned: true,
+                    minWidth: 160
+                },
+                
+                {
+                    headerName: "Action",
+                    cellStyle: {
+                        textAlign: 'center'
+                    },
+                    cellRenderer: function (params) {
+                        return `<button onclick="timesheets.openWeekReportModal('${params.data.timesheetID}','${params.data.employeeName}', '${params.data.displayTitle}', '${params.data.hoursTotal}', '${params.data.minutesTotal}')" class="ui mini button blue"><i class="eye icon"></i>View</button>`;
+                    },
+                    pinned: 'right',
+                    lockPinned: true,
+                    filter: false,
+                    sortable: false,
+                    width: 130,
+                    minWidth: 130
+                }
+            ]
+        };
+        timesheets.objGrid = new agGrid.Grid(document.querySelector("#approvedTimesheetGrid"), gridOptions);
+    }
+
+    timesheets.CommentRenderer = function (params) {
+        const text = params.value || "";
+        const maxLength = 30;
+
+        if (text.length > maxLength) {
+            const truncatedText = text.substring(0, maxLength) + ".....";
+            return `<span>${truncatedText}</span>`;
+        }
+        return text;
+    }
+
+    timesheets.openWeekReportModal = function (Id, empName, duration, hrs, min) {
+
+        $('#userName').text(empName);
+        $('#duration').text(duration + "  Report");
+        $('#hours').text("Total: " + hrs + "h " + min + "m");
+
+        $.ajax({
+            url: `/api/timesheet/${Id}`,
+            method: 'GET',
+            success: function (data) {
+                timesheets.populateWeekReportTable(data);
+                $('#weekReportModal').modal('show');
+            },
+            error: function (error) {
+                helper.ErrorToast('Failed to load week report data.');
+            }
+        });
+    }
+
+    timesheets.populateWeekReportTable = function (data) {
+
+        $('.ui.accordion').empty();
+
+        var groupedData = _.groupBy(data, (report) =>
+            moment(report.date).format('YYYY-MM-DD')
+        );
+
+        var sortedDates = _.sortBy(Object.keys(groupedData), (date) =>
+            moment(date)
+        );
+
+        _.each(sortedDates, (date, index) => {
+            var reports = groupedData[date];
+            var dayOfWeek = moment(date).format('dddd');
+            var formattedDate = moment(date).format('DD MMM YYYY');
+
+            var isWeekend = dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
+
+            var totalMinutes = _.reduce(reports, (sum, report) => sum + report.hours * 60 + report.minutes, 0);
+            var totalHours = Math.floor(totalMinutes / 60);
+            var remainingMinutes = totalMinutes % 60;
+
+            var tableRows = _.map(reports, (report, rowIndex) => {
+
+                var tooltip = report.comment
+                    ? `data-tooltip="${report.comment}" data-position="top left"`
+                    : '';
+
+                return `
+                                <tr class="${rowIndex % 2 == 0 ? 'alt-row' : 'regular-row'}">
+                                <td>${rowIndex + 1}</td>
+                                <td>${dayOfWeek}</td>
+                                <td>${helper.DateForamt1(report.date)}</td>
+                                <td>${report.engagementName}</td>
+                                <td>${report.taskName}</td>
+                                <td ${tooltip}>${report.comment || ''}</td>
+                                <td>${report.hours}</td>
+                                <td>${report.minutes}</td>
+                            </tr>
+                        `;
+            }).join('');
+
+            var accordionSection = `
+                        <div class="title ${index === -1 ? 'active' : ''}" style="${isWeekend ? 'background-color: #ecffe2;' : ''}">
+                            <i class="dropdown icon"></i>
+                            <span>${dayOfWeek} - ${formattedDate}</span>
+                            <span class="ui basic meduim label black">Total: ${totalHours}h ${remainingMinutes}m</span>
+                        </div>
+                        <div class="content ${index === -1 ? 'active' : ''}" style="${isWeekend ? 'background-color: #ecffe2;' : ''}">
+                            <table class="ui celled table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th style="width: 80px;">Day</th>
+                                        <th style="width: 120px;">Date</th>
+                                        <th>Engagement</th>
+                                        <th>Task</th>
+                                        <th style="width: 500px;">Comment</th>
+                                        <th style="width: 80px;">Hours</th>
+                                        <th style="width: 80px;">Minutes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+            $('.ui.accordion').append(accordionSection);
+        });
+
+        // Initialize accordion
+        $('.ui.accordion').accordion();
+    };
+
+    $('#modal-close-btn').on('click', function () {
+        $('#weekReportModal').modal('hide');
+    });
+
+    timesheets.openCommentsModal = (timesheetId) => {
+        $.ajax({
+            url: `/api/timesheet/gettimesheetcomments?timesheetId=${timesheetId}`,
+            method: 'GET',
+            success: (data) => {
+                timesheets.populateComments(data);
+                $('#commentsModal').modal('show');
+            }
+        });
+    };
+
+    timesheets.populateComments = (data) => {
+        $('#commentsBody').empty();
+
+        if (!data || data.length === 0) {
+            $('#commentsBody').append('<div>No comments available</div>');
+            return;
+        }
+
+        data.forEach((comment) => {
+            let iconClass = '';
+            let type = '';
+
+            // Determine icon and color based on comment type
+            if (comment.commentType === 1) {
+                iconClass = 'blue paper plane circle icon mt-3';
+                type = '<span class="ui medium blue text">submitted</span>';
+
+            } else if (comment.commentType === 2) {
+                iconClass = 'red exclamation circle icon mt-3';
+                type = '<span class="ui medium red text">rejected</span>';
+
+            } else {
+                iconClass = 'green check circle icon mt-3';
+                type = '<span class="ui medium green text">approved</span>';
+                    
+            }
+
+            // Construct the HTML for each comment
+            var commentHtml = `
+                <div class="event">
+                    <div class=" ${helper.getRandomColor()} label mt-3" data-text="${helper.getInitials(comment.commentByUser)}">
+                    </div>
+                    <div class="content" style="margin: 0;">
+                        <div class="summary">
+                            <a class="user blue label">
+                                ${comment.commentByUser}
+                                </a> <i>${type}</i> the Timesheet
+                            <div class="date">
+                                ${helper.formatRelativeTime2(comment.commentDate)}
+                            </div>
+                        </div>
+                        <div class="extra text">
+                                <i style="color:#74777a;"> '${comment.commentText}' </i>
+                        </div>
+                        <div class="meta"></div>
+                    </div>
+                </div>
+            `;
+
+            $('#commentsBody').append(commentHtml);
+        });
+    };
+
+
+
+    $('#modal-close-btn-comment').on('click', function () {
+        $('#commentsModal').modal('hide');
+    });
+
+
+    timesheets.onNameClick = function (timesheetID, empName) {
+        timesheets.openWeekReportModal(timesheetID, empName);
+    }
+
+    $(document).ready(function () {
+
+        timesheets.get();
+
+    });
+</script>

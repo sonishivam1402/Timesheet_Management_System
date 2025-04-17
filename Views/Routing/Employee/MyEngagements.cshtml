@@ -1,0 +1,189 @@
+﻿<div class="main-component">
+    <!--HEADING-->
+    <div class="ui grid padded main-component_heading">
+        <div class="eight wide column main-component_no_padding">
+            <h1 class="ui header">My Engagements</h1>
+        </div>
+    </div>
+    <!--GRID-->
+    <div id="myGrid" class="ag-theme-alpine main-component_body"></div>
+</div>
+
+<!--MODAL-->
+<div class="ui medium centered modal" id="engagementDetailsModal" style="height: auto;">
+    <h1 class="ui center aligned blue header x-large" id="systemUserModalHeader">Engagement Details</h1>
+    <div class="content">
+        <div class="ui two column very relaxed grid">
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small tag icon"></i>
+                        <div class="content">
+                            Title
+                            <div id="modalEngagementTitle" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small calendar icon"></i>
+                        <div class="content">
+                            Duration
+                            <div id="modalDurationDate" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small file alternate icon"></i>
+                        <div class="content">
+                            Description
+                            <div id="modalEngagementDescription" class="sub header"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui vertical segment">
+                    <div class="ui header">
+                        <i class="small user tie icon"></i>
+                        <div class="content">
+                            Owners
+                            <span id="ownerCount"></span>
+                            <div id="modalOwners"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui vertical segment">
+            <div class="ui header">
+                <i class="small users icon"></i>
+                <div class="content">
+                    Team Members
+                    <span id="teamMemberCount"></span>
+                    <div id="modalTeamMembers"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="ui red button" onclick="$('#engagementDetailsModal').modal('hide');">Close</button>
+    </div>
+</div>
+
+<!--JAVASCRIPT-->
+<script>
+    var engagements = {};
+    var engagementData = {};
+    //var helper = {};
+
+    // Column definitions for the AG Grid
+    var columnDefs = [
+        { headerName: "#", field: "SerialNumber", flex: 0.3 },
+        { headerName: "Engagements", field: "title", flex: 1 },
+        { headerName: "Start Date", field: "startDate", valueFormatter: params => helper.DateForamt1(params.value), flex: 1 },
+        { headerName: "End Date", field: "endDate", valueFormatter: params => helper.DateForamt1(params.value), flex: 1 },
+        {
+            headerName: "Action",
+            cellStyle: { textAlign: 'center' },
+            cellRenderer: (params) => {
+                return `<button onclick="engagements.showEngagementDetails(${params.data.engagementID})" class="ui medium button blue" style="text-align: center"><i class="eye outline icon"></i>View</button>`;
+            },
+            pinned: 'center',
+            lockPinned: true,
+            filter: false,
+            sortable: false,
+            width: 150,
+            minWidth: 150
+        }
+    ];
+
+    var gridOptions = {
+        columnDefs: columnDefs,
+        suppressMovable: true,
+        suppressDragLeaveHidesColumns: true,
+        rowData: [],
+        defaultColDef: {
+            cellStyle: { fontSize: '16px' }
+        },
+        pagination: true,
+        paginationPageSize: 100,
+        paginationPageSizeSelector: [10, 25, 50, 100]
+    };
+
+    engagements.loadGrid = function () {
+        $.ajax({
+            url: '/api/engagement/myengagements',
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                engagementData = response;
+                var gridData = response.map((item, index) => ({
+                    SerialNumber: index + 1,
+                    engagementID: item.engagementID,
+                    title: item.title,
+                    startDate: item.startDate,
+                    endDate: item.endDate
+                }))
+                gridOptions.api.applyTransaction({ add: gridData });
+            }
+        })
+    }
+
+    engagements.showEngagementDetails = function (engagementId) {
+        var engagement = engagementData.find(item => item.engagementID === engagementId);
+                // console.log(engagement);
+
+                if (engagement) {
+                    $('#modalEngagementTitle').text(engagement.title);
+                    $('#modalEngagementDescription').text(engagement.description);
+                    $('#modalDurationDate').text(helper.DateForamt1(engagement.startDate) + "  to  " + helper.DateForamt1(engagement.endDate));
+
+                    var owners = engagement.owners ? (Array.isArray(engagement.owners) ? engagement.owners : engagement.owners.split(',').map(name => name.trim())) : [];
+                    $('#ownerCount').text(" (" + owners.length + ")");
+
+                    var ownersContainer = $('#modalOwners').empty();
+                    owners.forEach(owner => {
+                        var ownerName = owner.ownerName || owner;
+                        var label = $('<label>')
+                            .addClass('ui label gray')
+                            .text(ownerName);
+
+                        ownersContainer.append(label);
+                    });
+
+                    var teamMembers = engagement.teamMembers ? engagement.teamMembers.split(',').map(name => name.trim()) : [];
+                    $('#teamMemberCount').text(" (" + teamMembers.length + ")");
+
+                    var teamMembersContainer = $('#modalTeamMembers').empty();
+                    teamMembers.forEach(teamMember => {
+                        var memberName = teamMember.teamMemberName || teamMember;
+                        var label = $('<label>')
+                            .addClass('ui label gray')
+                            .text(memberName);
+
+                        teamMembersContainer.append(label);
+                    });
+
+                    $('#engagementDetailsModal').modal({
+                        centered: true,
+                        detachable: false,
+                        closable: true
+                    }).modal('show');
+                } else {
+                    helper.ErrorToast('No Engagement Found');
+                }
+    }
+
+    // Initialize the grid
+    $(document).ready(function () {
+        var eGridDiv = document.querySelector('#myGrid');
+        var gridApi = new agGrid.Grid(eGridDiv, gridOptions);
+        engagements.loadGrid();
+    });
+</script>
