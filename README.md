@@ -74,7 +74,7 @@ The database includes tables for users, roles, timesheets, projects, and notific
 ### Steps
  **Clone the Repository**
    ```sh
-   git clone https://github.com/krunalvasava13/Full-Stack-TimeSheet-Management-System.git
+   git clone https://github.com/sonishivam1402/Timesheet_Management_System.git
    ```
 
 ## API Documentation
