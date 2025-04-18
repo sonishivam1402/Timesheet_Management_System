@@ -63,6 +63,14 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+appsettings.json
+appsettings.Development.json
+appsettings.Integration.json
+appsettings.Prod.json
+appsettings.QA.json
+
+05.Nov.2024.zip
+
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
